@@ -1,0 +1,89 @@
+# Production configuration for Quantum Task Planner
+app:
+  name: quantum-task-planner
+  version: 1.0.0
+  environment: production
+  debug: false
+
+# Logging configuration
+logging:
+  level: INFO
+  format: json
+  handlers:
+    - console
+    - file
+  file:
+    path: /app/logs/quantum-planner.log
+    max_size: 100MB
+    backup_count: 10
+
+# Backend configuration
+backends:
+  default: auto
+  timeout: 60
+  retry_attempts: 3
+  retry_delay: 1.0
+
+  quantum:
+    dwave:
+      enabled: true
+      timeout: 30
+      num_reads: 1000
+      chain_strength: 2.0
+    
+    azure:
+      enabled: true
+      timeout: 45
+      provider: microsoft.simulatedannealing
+    
+    ibm:
+      enabled: false
+      timeout: 60
+      shots: 8192
+
+  classical:
+    simulated_annealing:
+      enabled: true
+      max_iterations: 10000
+      initial_temperature: 100
+      cooling_rate: 0.95
+    
+    genetic_algorithm:
+      enabled: true
+      population_size: 100
+      generations: 500
+      mutation_rate: 0.1
+
+# Caching
+cache:
+  enabled: true
+  backend: redis
+  ttl: 3600
+  max_size: 1000
+
+# Database
+database:
+  enabled: true
+  url: ${DATABASE_URL}
+  pool_size: 10
+  max_overflow: 20
+
+# Security
+security:
+  enable_auth: true
+  rate_limit: 100
+  max_concurrent_jobs: 10
+  audit_log: true
+
+# Monitoring
+monitoring:
+  metrics_enabled: true
+  health_check_enabled: true
+  prometheus_port: 9090
+  
+# Performance tuning
+performance:
+  max_problem_size: 1000
+  decomposition_threshold: 50
+  parallel_workers: 4
+  memory_limit_gb: 8

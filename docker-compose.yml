@@ -1,0 +1,273 @@
+# Docker Compose for Quantum Task Planner Development and Production
+
+version: '3.8'
+
+services:
+  # Main application service
+  quantum-planner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: quantum-planner-app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - QUANTUM_PLANNER_ENV=production
+      - LOG_LEVEL=INFO
+      - BACKEND_TYPE=auto
+      - REDIS_URL=redis://redis:6379/0
+      - POSTGRES_URL=postgresql://quantum:quantum@postgres:5432/quantum_planner
+    volumes:
+      - ./config:/app/config:ro
+      - quantum_data:/app/data
+      - quantum_logs:/app/logs
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - quantum-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Development service
+  quantum-planner-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: quantum-planner-dev
+    volumes:
+      - .:/app
+      - quantum_dev_cache:/root/.cache
+    environment:
+      - QUANTUM_PLANNER_ENV=development
+      - LOG_LEVEL=DEBUG
+    ports:
+      - "8001:8000"
+      - "8888:8888"  # Jupyter
+    command: bash
+    stdin_open: true
+    tty: true
+    networks:
+      - quantum-network
+
+  # Worker service for distributed processing
+  quantum-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: quantum-worker
+    restart: unless-stopped
+    environment:
+      - QUANTUM_PLANNER_ENV=production
+      - LOG_LEVEL=INFO
+      - WORKER_MODE=true
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./config:/app/config:ro
+      - quantum_data:/app/data
+      - quantum_logs:/app/logs
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - quantum-network
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    command: ["worker"]
+
+  # Redis for caching and job queues
+  redis:
+    image: redis:7-alpine
+    container_name: quantum-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - quantum-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    command: >
+      --save 60 1000
+      --loglevel warning
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+
+  # PostgreSQL for persistent storage
+  postgres:
+    image: postgres:15-alpine
+    container_name: quantum-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=quantum_planner
+      - POSTGRES_USER=quantum
+      - POSTGRES_PASSWORD=quantum
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - quantum-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quantum -d quantum_planner"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Monitoring with Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: quantum-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - quantum-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: quantum-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=quantum
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - quantum-network
+    depends_on:
+      - prometheus
+
+  # Jupyter for research and development
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: quantum-jupyter
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=quantum
+    volumes:
+      - .:/app
+      - jupyter_data:/home/quantum/.jupyter
+    networks:
+      - quantum-network
+    command: >
+      bash -c "
+        jupyter lab
+        --ip=0.0.0.0
+        --port=8888
+        --no-browser
+        --allow-root
+        --notebook-dir=/app
+        --NotebookApp.token=quantum
+      "
+
+  # Load balancer (nginx)
+  nginx:
+    image: nginx:alpine
+    container_name: quantum-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - quantum-planner
+    networks:
+      - quantum-network
+
+  # Testing service
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: testing
+    container_name: quantum-tests
+    volumes:
+      - .:/app
+      - test_reports:/app/reports
+    environment:
+      - QUANTUM_PLANNER_ENV=testing
+      - PYTEST_ARGS=--cov=src --cov-report=html --cov-report=xml
+    networks:
+      - quantum-network
+    command: ["test"]
+    profiles:
+      - testing
+
+# Networks
+networks:
+  quantum-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+
+# Volumes
+volumes:
+  quantum_data:
+    driver: local
+  quantum_logs:
+    driver: local
+  quantum_dev_cache:
+    driver: local
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  jupyter_data:
+    driver: local
+  test_reports:
+    driver: local
+
+# Override for development
+x-development-overrides: &development-overrides
+  environment:
+    - QUANTUM_PLANNER_ENV=development
+    - LOG_LEVEL=DEBUG
+    - ENABLE_DEBUG_TOOLBAR=true
+  volumes:
+    - .:/app
