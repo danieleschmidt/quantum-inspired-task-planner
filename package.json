@@ -1,0 +1,23 @@
+{
+  "name": "quantum-inspired-task-planner",
+  "version": "1.0.0",
+  "description": "QUBO-based task scheduler for agent pools using quantum annealing and classical optimization",
+  "scripts": {
+    "dev": "make dev",
+    "test": "make test-all",
+    "lint": "make lint",
+    "format": "make format",
+    "build": "make build"
+  },
+  "keywords": ["quantum", "optimization", "scheduling", "QUBO", "annealing"],
+  "author": "Daniel Schmidt <daniel@terragon.ai>",
+  "license": "MIT",
+  "homepage": "https://github.com/your-org/quantum-inspired-task-planner",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/quantum-inspired-task-planner.git"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
