@@ -1,0 +1,271 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "quantum-inspired-task-planner"
+version = "1.0.0"
+description = "QUBO-based task scheduler for agent pools using quantum annealing and classical optimization"
+authors = ["Daniel Schmidt <daniel@terragon.ai>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/your-org/quantum-inspired-task-planner"
+repository = "https://github.com/your-org/quantum-inspired-task-planner"
+documentation = "https://docs.your-org.com/quantum-planner"
+keywords = ["quantum", "optimization", "scheduling", "QUBO", "annealing"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+packages = [{include = "quantum_planner", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+numpy = "^1.24.0"
+scipy = "^1.10.0"
+networkx = "^3.0"
+pydantic = "^2.0.0"
+pyyaml = "^6.0"
+click = "^8.0.0"
+rich = "^13.0.0"
+loguru = "^0.7.0"
+tenacity = "^8.0.0"
+
+# Optional quantum backend dependencies
+dwave-ocean-sdk = {version = "^6.0.0", optional = true}
+azure-quantum = {version = "^1.0.0", optional = true}
+qiskit = {version = "^0.45.0", optional = true}
+qiskit-optimization = {version = "^0.6.0", optional = true}
+
+# Performance dependencies
+numba = {version = "^0.58.0", optional = true}
+cupy = {version = "^12.0.0", optional = true}
+
+# Framework integrations
+crewai = {version = "^0.1.0", optional = true}
+autogen-agentchat = {version = "^0.2.0", optional = true}
+langchain = {version = "^0.1.0", optional = true}
+
+[tool.poetry.group.dev.dependencies]
+# Testing
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+pytest-mock = "^3.11.0"
+pytest-asyncio = "^0.21.0"
+pytest-benchmark = "^4.0.0"
+hypothesis = "^6.82.0"
+
+# Code quality
+black = "^23.7.0"
+ruff = "^0.0.287"
+mypy = "^1.5.0"
+pre-commit = "^3.3.0"
+
+# Documentation
+sphinx = "^7.1.0"
+sphinx-rtd-theme = "^1.3.0"
+myst-parser = "^2.0.0"
+sphinx-autodoc-typehints = "^1.24.0"
+
+# Development tools
+ipython = "^8.14.0"
+jupyterlab = "^4.0.0"
+matplotlib = "^3.7.0"
+seaborn = "^0.12.0"
+plotly = "^5.15.0"
+notebook = "^7.0.0"
+
+[tool.poetry.group.test.dependencies]
+pytest-xdist = "^3.3.0"
+pytest-timeout = "^2.1.0"
+pytest-clarity = "^1.0.0"
+factory-boy = "^3.3.0"
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.5.0"
+mkdocs-material = "^9.2.0"
+mkdocstrings = {extras = ["python"], version = "^0.22.0"}
+
+[tool.poetry.extras]
+dwave = ["dwave-ocean-sdk"]
+azure = ["azure-quantum"]
+ibm = ["qiskit", "qiskit-optimization"]
+gpu = ["cupy", "numba"]
+crewai = ["crewai"]
+autogen = ["autogen-agentchat"]
+langchain = ["langchain"]
+all = [
+    "dwave-ocean-sdk", 
+    "azure-quantum", 
+    "qiskit", 
+    "qiskit-optimization",
+    "cupy", 
+    "numba",
+    "crewai",
+    "autogen-agentchat",
+    "langchain"
+]
+
+[tool.poetry.scripts]
+quantum-planner = "quantum_planner.cli:main"
+qp = "quantum_planner.cli:main"
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.ruff]
+target-version = "py39"
+line-length = 88
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings  
+    "F",   # pyflakes
+    "I",   # isort
+    "C",   # flake8-comprehensions
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "S",   # flake8-bandit
+    "T20", # flake8-print
+    "SIM", # flake8-simplify
+    "ARG", # flake8-unused-arguments
+    "DTZ", # flake8-datetimez
+    "Q",   # flake8-quotes
+    "TCH", # flake8-type-checking
+    "D",   # pydocstyle
+]
+ignore = [
+    "D100", # Missing docstring in public module
+    "D104", # Missing docstring in public package
+    "D107", # Missing docstring in __init__
+    "D203", # 1 blank line required before class docstring
+    "D213", # Multi-line docstring summary should start at the second line
+    "S101", # Use of assert detected
+    "S311", # Standard pseudo-random generators are not suitable for security/cryptographic purposes
+]
+unfixable = ["B", "SIM", "ARG"]
+
+[tool.ruff.per-file-ignores]
+"tests/**/*.py" = ["S101", "ARG", "D"]
+"examples/**/*.py" = ["D", "T20"]
+"benchmarks/**/*.py" = ["D", "T20"]
+
+[tool.ruff.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "dwave.*",
+    "azure.quantum.*",
+    "qiskit.*",
+    "networkx.*",
+    "matplotlib.*",
+    "seaborn.*",
+    "plotly.*",
+    "crewai.*",
+    "autogen.*",
+    "langchain.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=src/quantum_planner",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-fail-under=80"
+]
+testpaths = ["tests"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "quantum: marks tests that require quantum backends",
+    "integration: marks tests as integration tests",
+    "benchmark: marks tests as benchmarks",
+]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["src/quantum_planner"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/.*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError", 
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+line_length = 88
+known_first_party = ["quantum_planner"]
+known_third_party = ["dwave", "azure", "qiskit", "numpy", "scipy", "networkx"]
+
+[tool.bandit]
+exclude_dirs = ["tests", "examples"]
+skips = ["B101", "B601"]

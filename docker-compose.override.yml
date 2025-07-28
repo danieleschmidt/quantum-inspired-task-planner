@@ -1,0 +1,83 @@
+# Docker Compose Override for Development
+# This file is automatically loaded when running docker-compose in development
+
+version: '3.8'
+
+services:
+  quantum-planner:
+    build:
+      target: development
+    environment:
+      - QUANTUM_PLANNER_ENV=development
+      - LOG_LEVEL=DEBUG
+      - ENABLE_DEBUG_TOOLBAR=true
+      - ENABLE_HOT_RELOAD=true
+    volumes:
+      - .:/app
+      - quantum_dev_cache:/root/.cache
+    ports:
+      - "8000:8000"
+      - "8001:8001"  # Debug port
+    command: >
+      bash -c "
+        echo 'Starting development server...' &&
+        quantum-planner server
+        --host 0.0.0.0
+        --port 8000
+        --reload
+        --debug
+      "
+
+  quantum-worker:
+    build:
+      target: development
+    environment:
+      - QUANTUM_PLANNER_ENV=development
+      - LOG_LEVEL=DEBUG
+    volumes:
+      - .:/app
+    deploy:
+      replicas: 1  # Reduce workers in development
+
+  # Additional development services
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: quantum-mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - quantum-network
+
+  # Database admin interface
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: quantum-pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@quantum.local
+      - PGADMIN_DEFAULT_PASSWORD=quantum
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - quantum-network
+    depends_on:
+      - postgres
+
+  # Redis admin interface
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: quantum-redis-commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    networks:
+      - quantum-network
+    depends_on:
+      - redis
+
+volumes:
+  pgadmin_data:
+    driver: local
