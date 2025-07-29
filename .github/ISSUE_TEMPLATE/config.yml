@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/your-org/quantum-inspired-task-planner/discussions
+    about: Ask questions, share ideas, or discuss the project with the community
+  - name: 📚 Documentation
+    url: https://docs.your-org.com/quantum-planner
+    about: Check the comprehensive documentation for usage examples and API reference
+  - name: 🎓 Tutorial
+    url: https://learn.your-org.com/quantum
+    about: Learn quantum optimization basics and advanced techniques
+  - name: 💡 Feature Discussions
+    url: https://github.com/your-org/quantum-inspired-task-planner/discussions/categories/ideas
+    about: Discuss potential new features and enhancements before creating issues
+  - name: 🚨 Security Issues
+    url: mailto:security@your-org.com
+    about: Report security vulnerabilities privately via email (do not create public issues)
