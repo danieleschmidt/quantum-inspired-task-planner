@@ -1,0 +1,123 @@
+# Prometheus Configuration for Quantum Task Planner
+# Comprehensive monitoring and alerting setup
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'quantum-planner'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - "quantum_alerts.yml"
+  - "performance_alerts.yml"
+  - "backend_alerts.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Quantum Task Planner Application Metrics
+  - job_name: 'quantum-planner'
+    static_configs:
+      - targets: ['quantum-planner:9090']
+    scrape_interval: 10s
+    metrics_path: /metrics
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: quantum-planner:9090
+
+  # Backend-specific monitoring
+  - job_name: 'quantum-backends'
+    static_configs:
+      - targets: 
+          - 'dwave-monitor:9091'
+          - 'ibm-quantum-monitor:9092'
+          - 'azure-quantum-monitor:9093'
+    scrape_interval: 30s
+    metrics_path: /backend-metrics
+
+  # Classical solver monitoring
+  - job_name: 'classical-solvers'
+    static_configs:
+      - targets: ['classical-solver-pool:9094']
+    scrape_interval: 15s
+
+  # Redis monitoring (caching and job queues)
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 15s
+
+  # System metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: 
+          - 'node-exporter:9100'
+    scrape_interval: 15s
+
+  # Container metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 15s
+    metrics_path: /metrics
+
+  # Application performance monitoring
+  - job_name: 'apm-server'
+    static_configs:
+      - targets: ['apm-server:8200']
+    scrape_interval: 30s
+
+  # Load balancer metrics
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+    scrape_interval: 15s
+
+  # Framework integration metrics
+  - job_name: 'framework-integrations'
+    static_configs:
+      - targets:
+          - 'crewai-integration:9095'
+          - 'autogen-integration:9096'  
+          - 'langchain-integration:9097'
+    scrape_interval: 20s
+
+  # Business metrics
+  - job_name: 'business-metrics'
+    static_configs:
+      - targets: ['business-metrics-collector:9098']
+    scrape_interval: 60s
+    metrics_path: /business-metrics
+
+  # Custom quantum metrics
+  - job_name: 'quantum-metrics'
+    static_configs:
+      - targets: ['quantum-metrics-collector:9099']
+    scrape_interval: 30s
+    params:
+      collect[]: ['qubit_usage', 'coherence_time', 'gate_fidelity', 'annealing_success_rate']
+
+# Remote write configuration for long-term storage
+remote_write:
+  - url: "https://prometheus-remote-storage/api/v1/write"
+    queue_config:
+      max_samples_per_send: 1000
+      max_shards: 200
+      capacity: 2500
+
+# Remote read configuration  
+remote_read:
+  - url: "https://prometheus-remote-storage/api/v1/read"
+    read_recent: true

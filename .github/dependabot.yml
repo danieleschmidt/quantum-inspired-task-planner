@@ -1,0 +1,135 @@
+# Dependabot configuration for automated dependency updates
+# See https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  # Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    target-branch: "develop"
+    open-pull-requests-limit: 10
+    assignees:
+      - "quantum-maintainers"
+    reviewers:
+      - "quantum-maintainers"
+    labels:
+      - "dependencies"
+      - "python"
+      - "automated"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    # Group quantum-related dependencies
+    groups:
+      quantum-backends:
+        patterns:
+          - "dwave-*"
+          - "qiskit*"
+          - "azure-quantum*"
+          - "pennylane*"
+      optimization-libs:
+        patterns:
+          - "numpy"
+          - "scipy"
+          - "networkx"
+          - "cvxpy"
+      dev-tools:
+        patterns:
+          - "pytest*"
+          - "black"
+          - "ruff"
+          - "mypy"
+          - "pre-commit"
+    # Version update strategies
+    versioning-strategy: "increase"
+    # Ignore specific dependencies that require manual updates
+    ignore:
+      - dependency-name: "dwave-ocean-sdk"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "qiskit"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/.github/workflows"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "10:00"
+      timezone: "UTC"
+    target-branch: "develop"
+    open-pull-requests-limit: 5
+    assignees:
+      - "devops-team"
+    reviewers:
+      - "devops-team"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci-cd"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+  # Docker base images
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "11:00"
+      timezone: "UTC"
+    target-branch: "develop"
+    open-pull-requests-limit: 3
+    assignees:
+      - "devops-team"
+    reviewers:
+      - "devops-team"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "infrastructure"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+
+  # Terraform modules (if present)
+  - package-ecosystem: "terraform"
+    directory: "/terraform"
+    schedule:
+      interval: "monthly"
+      day: "first-monday"
+      time: "12:00"
+      timezone: "UTC"
+    target-branch: "develop"
+    open-pull-requests-limit: 2
+    assignees:
+      - "infrastructure-team"
+    reviewers:
+      - "infrastructure-team"
+    labels:
+      - "dependencies"
+      - "terraform"
+      - "infrastructure"
+    commit-message:
+      prefix: "infra"
+      include: "scope"
+
+# Security-focused dependency updates
+registries:
+  npm-fontawesome:
+    type: npm-registry
+    url: https://npm.fontawesome.com
+    replaces-base: true
+
+# Additional configuration for quantum-specific dependencies
+  # Custom registry for internal quantum tools
+  internal-quantum-tools:
+    type: python-index
+    url: https://pypi.your-org.com/simple
+    replaces-base: false

@@ -1,0 +1,266 @@
+name: ⚡ Performance Issue
+description: Report performance problems or optimization opportunities  
+title: "[PERFORMANCE] "
+labels: ["performance", "optimization", "bug"]
+projects: ["quantum-inspired-task-planner"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ⚡ Performance Issue Report
+        
+        Help us optimize quantum-inspired task scheduling for better performance!
+        
+        **Performance is critical** for practical quantum optimization. Your detailed report helps us identify bottlenecks and improve algorithm efficiency.
+
+  - type: dropdown
+    id: performance_type
+    attributes:
+      label: Performance Issue Type
+      description: What kind of performance problem are you experiencing?
+      options:
+        - Slow problem formulation (QUBO construction)
+        - Long quantum backend job queue times
+        - Classical solver inefficiency
+        - Memory usage excessive
+        - Poor scaling with problem size
+        - Network/communication delays
+        - Backend selection suboptimal
+        - Solution quality degradation
+        - Other performance concern
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem_description
+    attributes:
+      label: Problem Description
+      description: Describe the performance issue in detail
+      placeholder: |
+        What's happening:
+        - Expected performance: Should complete in X seconds
+        - Actual performance: Taking Y seconds/minutes
+        - Performance degradation: Started happening when...
+        - Impact: This affects workflow by...
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Details
+      description: Your system and configuration
+      placeholder: |
+        System:
+        - OS: Linux/macOS/Windows + version
+        - Python: version
+        - quantum-planner: version
+        - RAM: available memory
+        - CPU: type and cores
+        
+        Backend Configuration:
+        - Primary backend: D-Wave/IBM/Azure/Classical
+        - Fallback chain: configured fallbacks
+        - Network: connection speed/latency
+        
+        Dependencies:
+        - numpy: version
+        - scipy: version
+        - Backend SDKs: versions
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem_details
+    attributes:
+      label: Problem Characteristics
+      description: Details about the optimization problem being solved
+      placeholder: |
+        Problem Size:
+        - Agents: number of agents
+        - Tasks: number of tasks  
+        - Variables: estimated QUBO size
+        - Constraints: types and count
+        
+        Problem Complexity:
+        - Skill requirements: diversity/specificity
+        - Time windows: present/absent
+        - Dependencies: number of task dependencies
+        - Objectives: single/multi-objective
+        
+        Data Patterns:
+        - Problem structure: sparse/dense/regular
+        - Constraint tightness: over/under constrained
+        - Solution space: large/limited
+    validations:
+      required: true
+
+  - type: textarea
+    id: performance_metrics
+    attributes:
+      label: Performance Measurements
+      description: Specific timing and resource usage data
+      placeholder: |
+        Timing Breakdown:
+        - Problem formulation: X.X seconds
+        - Backend selection: X.X seconds  
+        - Problem submission: X.X seconds
+        - Queue time: X.X seconds
+        - Solve time: X.X seconds
+        - Result processing: X.X seconds
+        - Total time: X.X seconds
+        
+        Resource Usage:
+        - Peak memory: XXX MB
+        - CPU utilization: XX%
+        - Network traffic: XX MB
+        
+        Benchmarks:
+        - Problem size vs time: scaling behavior
+        - Comparative performance: other solvers/tools
+    validations:
+      required: true
+
+  - type: textarea
+    id: code_example
+    attributes:
+      label: Minimal Reproducible Example
+      description: Code that demonstrates the performance issue
+      placeholder: |
+        ```python
+        from quantum_planner import QuantumTaskPlanner, Agent, Task
+        import time
+        
+        # Problem setup
+        agents = [Agent(f"agent_{i}", skills=..., capacity=...) 
+                  for i in range(NUM_AGENTS)]
+        tasks = [Task(f"task_{i}", required_skills=..., priority=...) 
+                 for i in range(NUM_TASKS)]
+        
+        # Performance measurement
+        start_time = time.time()
+        planner = QuantumTaskPlanner(backend="your-backend")
+        solution = planner.assign(agents, tasks, 
+                                  objective="minimize_makespan")
+        end_time = time.time()
+        
+        print(f"Total time: {end_time - start_time:.2f} seconds")
+        print(f"Solution quality: {solution.makespan}")
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: profiling_data
+    attributes:
+      label: Profiling Information
+      description: Detailed performance analysis if available
+      placeholder: |
+        If you've done profiling, share the results:
+        
+        Python Profiling:
+        - cProfile output: top functions by time
+        - line_profiler: bottleneck lines
+        - memory_profiler: peak usage points
+        
+        System Monitoring:
+        - htop/top: CPU/memory patterns
+        - iotop: disk I/O usage
+        - nethogs: network usage
+        
+        Backend Monitoring:
+        - Queue position tracking
+        - Job execution logs
+        - Error rate patterns
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Performance Impact
+      description: How severely does this affect your work?
+      options:
+        - Low - Noticeable but manageable delay
+        - Medium - Significantly slows down workflows  
+        - High - Makes feature practically unusable
+        - Critical - Blocks production deployment
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: workarounds
+    attributes:
+      label: Attempted Solutions
+      description: What have you tried to improve performance?
+      options:
+        - label: Switched to different backend
+        - label: Reduced problem size
+        - label: Modified constraints/objectives
+        - label: Changed system resources (more RAM/CPU)
+        - label: Adjusted backend parameters
+        - label: Used classical fallback
+        - label: Implemented custom caching
+        - label: Modified network configuration
+
+  - type: textarea
+    id: expected_performance
+    attributes:
+      label: Expected Performance  
+      description: What performance would you consider acceptable?
+      placeholder: |
+        Target Performance:
+        - Total solve time: under X seconds/minutes
+        - Memory usage: under XXX MB
+        - Scaling: linear/polynomial with problem size
+        - Success rate: X% of problems solved optimally
+        
+        Reference Benchmarks:
+        - Compared to: other tools/manual methods
+        - Industry standards: typical expectations
+        - Research baselines: published performance
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: Optimization Suggestions
+      description: Ideas for potential improvements
+      placeholder: |
+        Potential Optimizations:
+        - Algorithm improvements: better QUBO formulation
+        - Implementation optimizations: vectorization, parallelization  
+        - Backend optimizations: parameter tuning, better selection
+        - Caching strategies: problem similarity, solution reuse
+        - Architecture changes: async processing, streaming
+        
+        Research Directions:
+        - Papers or techniques that might help
+        - Alternative algorithms to consider
+        - Hardware optimizations possible
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+      placeholder: |
+        Related Issues: Links to similar performance problems
+        Business Impact: How this affects your organization
+        Timeline: When do you need this resolved
+        Resources: Can you help with testing/profiling
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### Performance Investigation Process
+        
+        1. **Reproduce**: Verify the performance issue with your example
+        2. **Profile**: Identify specific bottlenecks using profiling tools
+        3. **Analyze**: Determine root cause (algorithm, implementation, backend)
+        4. **Optimize**: Implement targeted performance improvements
+        5. **Validate**: Confirm improvement with benchmarks
+        6. **Document**: Update performance guidelines and best practices
+        
+        Thank you for making quantum optimization faster! 🚀

@@ -1,0 +1,191 @@
+# Quantum-Specific Alerting Rules
+# Critical alerts for quantum backend health and performance
+
+groups:
+  - name: quantum_backend_health
+    rules:
+      - alert: QuantumBackendDown
+        expr: up{job="quantum-backends"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: quantum_backend
+        annotations:
+          summary: "Quantum backend {{ $labels.instance }} is down"
+          description: "Quantum backend {{ $labels.instance }} has been down for more than 2 minutes. This will impact quantum optimization capabilities."
+          runbook_url: "https://docs.your-org.com/runbooks/quantum-backend-down"
+
+      - alert: QuantumJobQueueLarge
+        expr: quantum_job_queue_size > 100
+        for: 5m
+        labels:
+          severity: warning
+          component: quantum_scheduler
+        annotations:
+          summary: "Large quantum job queue detected"
+          description: "Quantum job queue has {{ $value }} jobs pending for more than 5 minutes. Consider scaling or checking backend health."
+
+      - alert: QuantumSolveTimeHigh
+        expr: histogram_quantile(0.95, quantum_solve_duration_seconds_bucket) > 300
+        for: 3m
+        labels:
+          severity: warning
+          component: quantum_solver
+        annotations:
+          summary: "High quantum solve times detected"
+          description: "95th percentile quantum solve time is {{ $value }}s, above 300s threshold."
+
+      - alert: QuantumErrorRateHigh
+        expr: rate(quantum_solve_errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          component: quantum_solver
+        annotations:
+          summary: "High quantum solve error rate"
+          description: "Quantum solve error rate is {{ $value }} errors/second over 5 minutes."
+
+  - name: quantum_resource_usage
+    rules:
+      - alert: QuantumCreditsLow
+        expr: quantum_credits_remaining < 1000
+        for: 1m
+        labels:
+          severity: warning
+          component: quantum_billing
+        annotations:
+          summary: "Quantum credits running low"
+          description: "Only {{ $value }} quantum credits remaining. Consider purchasing more or switching to classical fallbacks."
+
+      - alert: QubitUsageHigh
+        expr: quantum_qubits_used / quantum_qubits_available > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: quantum_resources
+        annotations:
+          summary: "High qubit utilization"
+          description: "Using {{ $value | humanizePercentage }} of available qubits for more than 5 minutes."
+
+      - alert: QuantumCoherenceTimeLow
+        expr: quantum_coherence_time_microseconds < 20
+        for: 10m
+        labels:
+          severity: warning
+          component: quantum_hardware
+        annotations:
+          summary: "Low quantum coherence time detected"
+          description: "Coherence time is {{ $value }}μs, below optimal threshold of 20μs."
+
+  - name: quantum_business_metrics
+    rules:
+      - alert: OptimizationQualityDegraded
+        expr: avg_over_time(solution_optimality_gap[1h]) > 0.1
+        for: 15m
+        labels:
+          severity: warning
+          component: optimization_quality
+        annotations:
+          summary: "Solution quality degradation detected"
+          description: "Average optimality gap over 1 hour is {{ $value | humanizePercentage }}, indicating degraded solution quality."
+
+      - alert: FallbackRateHigh
+        expr: rate(classical_fallback_triggered_total[1h]) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          component: backend_selection
+        annotations:
+          summary: "High classical fallback rate"
+          description: "Classical fallback triggered {{ $value }} times per hour, indicating quantum backend issues."
+
+      - alert: QuantumAdvantageNotAchieved
+        expr: avg_over_time(quantum_vs_classical_speedup[6h]) < 1.5
+        for: 30m
+        labels:
+          severity: warning
+          component: quantum_advantage
+        annotations:
+          summary: "Quantum advantage not being achieved"
+          description: "Average quantum speedup over 6 hours is only {{ $value }}x, below expected 1.5x threshold."
+
+  - name: quantum_security_alerts
+    rules:
+      - alert: UnauthorizedQuantumAccess
+        expr: increase(quantum_unauthorized_access_attempts_total[5m]) > 5
+        for: 1m
+        labels:
+          severity: critical
+          component: security
+        annotations:
+          summary: "Unauthorized quantum backend access attempts"
+          description: "{{ $value }} unauthorized quantum access attempts in 5 minutes."
+
+      - alert: QuantumCredentialsExpiring
+        expr: quantum_credentials_expiry_days < 7
+        for: 1h
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "Quantum credentials expiring soon"
+          description: "Quantum backend credentials expire in {{ $value }} days."
+
+  - name: framework_integration_alerts
+    rules:
+      - alert: CrewAIIntegrationFailure
+        expr: rate(crewai_integration_errors_total[5m]) > 0.05
+        for: 3m
+        labels:
+          severity: warning
+          component: framework_integration
+        annotations:
+          summary: "CrewAI integration experiencing errors"
+          description: "CrewAI integration error rate: {{ $value }} errors/second."
+
+      - alert: AutoGenOptimizationFailure
+        expr: rate(autogen_optimization_failures_total[10m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: framework_integration
+        annotations:
+          summary: "AutoGen quantum optimization failures"
+          description: "AutoGen quantum optimization failing at {{ $value }} failures/second."
+
+      - alert: LangChainChainTimeout
+        expr: rate(langchain_chain_timeouts_total[5m]) > 0.02
+        for: 2m
+        labels:
+          severity: warning
+          component: framework_integration
+        annotations:
+          summary: "LangChain quantum chain timeouts"
+          description: "LangChain quantum chains timing out at {{ $value }} timeouts/second."
+
+  - name: quantum_performance_sla
+    rules:
+      - alert: QuantumSLABreach
+        expr: |
+          (
+            histogram_quantile(0.95, quantum_solve_duration_seconds_bucket{problem_size="small"}) > 30 or
+            histogram_quantile(0.95, quantum_solve_duration_seconds_bucket{problem_size="medium"}) > 120 or
+            histogram_quantile(0.95, quantum_solve_duration_seconds_bucket{problem_size="large"}) > 600
+          )
+        for: 5m
+        labels:
+          severity: critical
+          component: sla
+        annotations:
+          summary: "Quantum solving SLA breach"
+          description: "95th percentile solve time for {{ $labels.problem_size }} problems: {{ $value }}s, exceeding SLA."
+
+      - alert: QuantumAvailabilitySLABreach
+        expr: avg_over_time(up{job="quantum-backends"}[1h]) < 0.99
+        for: 15m
+        labels:
+          severity: critical
+          component: sla
+        annotations:
+          summary: "Quantum backend availability SLA breach"
+          description: "Quantum backend availability over 1 hour: {{ $value | humanizePercentage }}, below 99% SLA."

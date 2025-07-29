@@ -1,0 +1,162 @@
+name: 🚀 Feature Request
+description: Propose a new feature or enhancement for the quantum task planner
+title: "[FEATURE] "
+labels: ["enhancement", "triage"]
+projects: ["quantum-inspired-task-planner"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🚀 Feature Request
+        Thank you for suggesting a feature for the Quantum-Inspired Task Planner!
+        
+        Before submitting, please check existing issues and our [roadmap](docs/ROADMAP.md).
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please verify these items before submitting
+      options:
+        - label: I searched existing issues and didn't find a duplicate
+          required: true
+        - label: I read the documentation and project roadmap
+          required: true
+        - label: This feature aligns with the project's quantum optimization goals
+          required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      description: What type of feature is this?
+      options:
+        - Backend Integration (Quantum/Classical)
+        - Algorithm Enhancement
+        - Framework Integration (CrewAI/AutoGen/LangChain)
+        - Performance Optimization
+        - Developer Experience
+        - Documentation
+        - Testing/Quality Assurance
+        - Security Enhancement
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Description
+      description: What problem does this feature solve?
+      placeholder: "Currently, users cannot... This makes it difficult to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe your proposed feature in detail
+      placeholder: |
+        I propose adding...
+        
+        Key capabilities:
+        - Feature A: ...
+        - Feature B: ...
+        
+        Implementation approach:
+        1. ...
+        2. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: What other approaches have you considered?
+      placeholder: "Alternative 1: ... Alternative 2: ..."
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Usage Examples
+      description: Show how the feature would be used
+      placeholder: |
+        ```python
+        # Example usage
+        planner = QuantumTaskPlanner()
+        # Your new feature here
+        ```
+
+  - type: dropdown
+    id: backend
+    attributes:
+      label: Target Backend
+      description: Which backends should support this feature?
+      multiple: true
+      options:
+        - D-Wave Quantum Annealing
+        - IBM Quantum (QAOA/VQE)
+        - Azure Quantum
+        - Classical Simulators
+        - All Backends
+        - Not Backend-Specific
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority Level
+      description: How important is this feature?
+      options:
+        - Low - Nice to have
+        - Medium - Would improve workflows
+        - High - Blocking current use cases
+        - Critical - Required for production use
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Expected Impact
+      description: How would this feature benefit users?
+      placeholder: |
+        Performance: Expected X% improvement in...
+        Usability: Makes it easier to...
+        Compatibility: Enables integration with...
+
+  - type: checkboxes
+    id: breaking
+    attributes:
+      label: Breaking Changes
+      description: Implementation considerations
+      options:
+        - label: This feature may require breaking changes to the API
+        - label: This feature requires new dependencies
+        - label: This feature affects existing backend integrations
+        - label: This feature changes default behavior
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+      placeholder: |
+        Links to research papers, similar implementations, 
+        quantum computing concepts, or related issues.
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### What Happens Next?
+        
+        1. **Triage**: Maintainers will review and label this issue
+        2. **Discussion**: Community feedback and technical discussion
+        3. **Planning**: If approved, we'll add it to our roadmap
+        4. **Implementation**: Either community contribution or maintainer implementation
+        
+        Thank you for contributing to quantum-inspired optimization! 🌟

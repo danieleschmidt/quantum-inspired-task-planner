@@ -1,0 +1,206 @@
+name: 🔌 Backend Integration Request  
+description: Request support for a new quantum or classical backend
+title: "[BACKEND] Add support for "
+labels: ["backend", "integration", "enhancement"]
+projects: ["quantum-inspired-task-planner"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🔌 Backend Integration Request
+        
+        Help us expand quantum-inspired optimization to new platforms!
+        
+        **Current Supported Backends:**
+        - D-Wave Quantum Annealing (Ocean SDK)
+        - IBM Quantum (Qiskit QAOA/VQE)
+        - Azure Quantum (Multiple providers)
+        - Classical Simulators (SA, GA, Tabu Search)
+
+  - type: input
+    id: backend_name
+    attributes:
+      label: Backend Name
+      description: What backend would you like to see supported?
+      placeholder: "e.g., Rigetti Forest, Google Cirq, Xanadu PennyLane"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: backend_type
+    attributes:
+      label: Backend Type
+      description: What type of computing platform is this?
+      options:
+        - Quantum Annealing
+        - Gate-based Quantum Computing
+        - Quantum-Classical Hybrid
+        - Classical Optimization
+        - Quantum Simulation
+        - Other/Custom
+    validations:
+      required: true
+
+  - type: textarea
+    id: provider_info
+    attributes:
+      label: Provider Information
+      description: Details about the backend provider
+      placeholder: |
+        Provider: Company/Organization name
+        Documentation: Links to SDK/API docs
+        Access Model: Cloud service, on-premise, simulator, etc.
+        Pricing: Free tier, academic access, commercial pricing
+    validations:
+      required: true
+
+  - type: textarea
+    id: capabilities
+    attributes:
+      label: Backend Capabilities
+      description: What optimization problems can this backend solve?
+      placeholder: |
+        Problem Types:
+        - QUBO optimization: Yes/No, max variables
+        - Ising model: Yes/No, coupling support
+        - QAOA: Yes/No, max circuit depth
+        - Constraint satisfaction: Yes/No, types supported
+        
+        Technical Specs:
+        - Max problem size: X qubits/variables
+        - Connectivity: Topology description
+        - Noise characteristics: Gate fidelity, coherence time
+        - Classical processing: Hybrid algorithms supported
+    validations:
+      required: true
+
+  - type: textarea
+    id: sdk_info
+    attributes:
+      label: SDK/API Information
+      description: Technical details about integration
+      placeholder: |
+        Primary SDK: Name and version
+        Programming Language: Python, C++, etc.
+        Installation: pip install package-name
+        Authentication: API keys, OAuth, certificates
+        Rate Limits: Requests per second/minute
+        
+        Key Classes/Functions:
+        - Connection: how to connect
+        - Job Submission: how to submit optimization problems
+        - Result Retrieval: how to get solutions
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_cases
+    attributes:
+      label: Use Cases & Benefits
+      description: Why would users want this backend integration?
+      placeholder: |
+        Unique Advantages:
+        - Performance: Faster for problem sizes X-Y
+        - Cost: More economical for certain workloads
+        - Availability: Better uptime/accessibility
+        - Features: Unique capabilities like...
+        
+        Target Users:
+        - Researchers working on...
+        - Companies needing...
+        - Developers who want...
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Usage Examples
+      description: Show how this backend would be used
+      placeholder: |
+        ```python
+        # Desired integration
+        from quantum_planner.backends import NewBackend
+        
+        backend = NewBackend(
+            api_key="your-key",
+            endpoint="backend-url"
+        )
+        
+        planner = QuantumTaskPlanner(backend=backend)
+        solution = planner.assign(agents, tasks)
+        ```
+
+  - type: checkboxes
+    id: implementation
+    attributes:
+      label: Implementation Considerations
+      description: Technical requirements for integration
+      options:
+        - label: I have access to this backend for testing
+        - label: Backend has Python SDK available
+        - label: Backend supports programmatic job submission
+        - label: Backend has clear documentation
+        - label: Backend provides error handling/retry mechanisms
+        - label: Backend has community or commercial support
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Community Priority
+      description: How important is this integration?
+      options:
+        - Low - Interesting but not urgent
+        - Medium - Would benefit specific use cases
+        - High - Many users would benefit
+        - Critical - Blocking adoption
+    validations:
+      required: true
+
+  - type: textarea
+    id: resources
+    attributes:
+      label: Available Resources
+      description: Can you help with implementation?
+      placeholder: |
+        I can contribute:
+        - [ ] Backend expertise and documentation
+        - [ ] SDK integration code
+        - [ ] Testing with real backend access
+        - [ ] Example problems and benchmarks
+        - [ ] Code review and feedback
+        - [ ] Financial support for backend access
+
+  - type: textarea
+    id: timeline
+    attributes:
+      label: Preferred Timeline
+      description: When would you like to see this implemented?
+      placeholder: |
+        Target Timeline: Next month/quarter/year
+        Urgency Reason: Why this timeline matters
+        Milestone Dependencies: What other features depend on this
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Information
+      description: Anything else we should know?
+      placeholder: |
+        Research papers, benchmark comparisons, 
+        similar integrations in other projects,
+        contacts at the backend provider, etc.
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### Integration Process
+        
+        1. **Technical Review**: Assess feasibility and architecture fit
+        2. **Community Feedback**: Gauge interest and gather requirements  
+        3. **Implementation Planning**: Design integration approach
+        4. **Development**: Backend adapter and testing infrastructure
+        5. **Validation**: Testing with real problems and benchmarks
+        6. **Documentation**: Integration guide and examples
+        
+        Thank you for expanding quantum optimization possibilities! 🚀
