@@ -1,34 +1,70 @@
 {
-  "python.defaultInterpreterPath": ".venv/bin/python",
+  "python.defaultInterpreterPath": "./.venv/bin/python",
   "python.linting.enabled": true,
-  "python.linting.flake8Enabled": false,
   "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": false,
   "python.linting.mypyEnabled": true,
   "python.linting.banditEnabled": true,
   "python.formatting.provider": "black",
-  "python.sortImports.provider": "isort",
+  "python.formatting.blackArgs": ["--line-length=88"],
+  "python.sortImports.args": ["--profile", "black"],
   "python.testing.pytestEnabled": true,
   "python.testing.pytestArgs": [
-    "tests/"
+    "tests/",
+    "--cov=src/quantum_planner",
+    "--cov-report=html",
+    "--cov-report=term"
   ],
-  "files.exclude": {
-    "**/__pycache__": true,
-    "**/*.pyc": true,
-    ".mypy_cache": true,
-    ".ruff_cache": true,
-    ".pytest_cache": true,
-    "htmlcov": true,
-    ".coverage": true
-  },
+  "ruff.args": ["--config=pyproject.toml"],
+  "ruff.fixAll": true,
   "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
   "editor.codeActionsOnSave": {
-    "source.organizeImports": true
+    "source.organizeImports": true,
+    "source.fixAll.ruff": true
   },
-  "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter",
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": true
-    }
+  "files.associations": {
+    "*.yml": "yaml",
+    "*.yaml": "yaml",
+    "Dockerfile*": "dockerfile",
+    "*.toml": "toml"
+  },
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.yml",
+    "https://json.schemastore.org/github-action.json": ".github/actions/*/action.yml",
+    "https://json.schemastore.org/dependabot-2.0.json": ".github/dependabot.yml"
+  },
+  "jupyter.notebookFileRoot": "${workspaceFolder}",
+  "jupyter.interactiveWindow.textEditor.executeSelection": true,
+  "markdown.preview.breaks": true,
+  "markdown.validate.enabled": true,
+  "git.autofetch": true,
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "search.exclude": {
+    "**/.git": true,
+    "**/.mypy_cache": true,
+    "**/.pytest_cache": true,
+    "**/.ruff_cache": true,
+    "**/htmlcov": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/__pycache__": true,
+    "**/*.egg-info": true
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/*.pyc": true,
+    "**/__pycache__": true
+  },
+  "terminal.integrated.env.linux": {
+    "PYTHONPATH": "${workspaceFolder}/src"
+  },
+  "terminal.integrated.env.osx": {
+    "PYTHONPATH": "${workspaceFolder}/src"
+  },
+  "terminal.integrated.env.windows": {
+    "PYTHONPATH": "${workspaceFolder}\\src"
   }
 }

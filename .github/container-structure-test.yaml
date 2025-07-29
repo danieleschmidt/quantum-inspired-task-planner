@@ -1,0 +1,64 @@
+# Container Structure Tests for Quantum Task Planner
+schemaVersion: 2.0.0
+
+commandTests:
+  - name: "Python is installed"
+    command: "python"
+    args: ["--version"]
+    expectedOutput: ["Python 3\\..+"]
+
+  - name: "Poetry is available"
+    command: "poetry"
+    args: ["--version"]
+    expectedOutput: ["Poetry \\(version.+\\)"]
+
+  - name: "Quantum planner CLI is available"
+    command: "quantum-planner"
+    args: ["--help"]
+    exitCode: 0
+
+fileExistenceTests:
+  - name: "Application code exists"
+    path: "/app"
+    shouldExist: true
+    isDirectory: true
+
+  - name: "Poetry configuration exists"
+    path: "/app/pyproject.toml"
+    shouldExist: true
+
+  - name: "Dependencies are installed"
+    path: "/app/.venv"
+    shouldExist: true
+    isDirectory: true
+
+fileContentTests:
+  - name: "Non-root user configured"
+    path: "/etc/passwd"
+    expectedContents: ["quantum:.*"]
+
+  - name: "Working directory is set"
+    path: "/app/pyproject.toml"
+    expectedContents: ["name = \"quantum-inspired-task-planner\""]
+
+metadataTest:
+  labels:
+    - key: "org.opencontainers.image.title"
+      value: "Quantum Task Planner"
+    - key: "org.opencontainers.image.description"
+      value: "QUBO-based task scheduler for agent pools"
+  
+  exposedPorts: ["8000"]
+  
+  workdir: "/app"
+
+securityTests:
+  - name: "No sensitive files in container"
+    command: "find"
+    args: ["/", "-name", "*.key", "-o", "-name", "*.pem", "-o", "-name", "*.crt"]
+    expectedOutput: []
+
+  - name: "No package managers in final image"
+    command: "which"
+    args: ["apt", "yum", "apk"]
+    exitCode: 1
