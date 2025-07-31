@@ -1,0 +1,49 @@
+{
+  "folders": [
+    {
+      "name": "Quantum Task Planner",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "python.defaultInterpreterPath": "./.venv/bin/python",
+    "python.poetryPath": "poetry",
+    "files.exclude": {
+      "**/__pycache__": true,
+      "**/.pytest_cache": true,
+      "**/.mypy_cache": true,
+      "**/.ruff_cache": true,
+      "**/quantum_results_cache": true,
+      "**/solution_cache": true,
+      "**/*.benchmark": true,
+      "**/htmlcov": true
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "charliermarsh.ruff",
+      "ms-python.black-formatter",
+      "ms-python.mypy-type-checker",
+      "ms-toolsai.jupyter",
+      "eamodio.gitlens",
+      "ms-vscode-remote.remote-containers"
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Setup Development Environment",
+        "type": "shell",
+        "command": "make",
+        "args": ["dev"],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,323 @@
+# Compliance Configuration for Quantum Task Planner
+# Supports multiple compliance frameworks and quantum-specific requirements
+
+compliance:
+  frameworks:
+    # SLSA (Supply Chain Levels for Software Artifacts)
+    slsa:
+      level: 3
+      requirements:
+        - build_service: "GitHub Actions"
+        - source_integrity: true
+        - build_integrity: true
+        - provenance_available: true
+        - hermetic_builds: true
+        - parameterless_builds: true
+        
+      build_requirements:
+        - name: "Reproducible Builds"
+          description: "All builds must be reproducible"
+          status: "implemented"
+          evidence: "Dockerfile with pinned versions"
+          
+        - name: "Source Control"
+          description: "All source code in version control"
+          status: "implemented"
+          evidence: "Git repository with signed commits"
+          
+        - name: "Build Service"
+          description: "Automated build service"
+          status: "documented"
+          evidence: "GitHub Actions workflows"
+          
+        - name: "Provenance"
+          description: "Build provenance generation"
+          status: "planned"
+          evidence: "SLSA provenance in CI"
+    
+    # SOC 2 Type II (for enterprise customers)
+    soc2:
+      applicable: true
+      domains:
+        - security
+        - availability
+        - processing_integrity
+        - confidentiality
+        
+      controls:
+        security:
+          - name: "Access Control"
+            id: "CC6.1"
+            description: "Logical access controls"
+            implementation: "RBAC with least privilege"
+            status: "implemented"
+            
+          - name: "Encryption"
+            id: "CC6.7"
+            description: "Data encryption in transit and at rest"
+            implementation: "TLS 1.3, AES-256"
+            status: "implemented"
+            
+        availability:
+          - name: "Monitoring"
+            id: "A1.2"
+            description: "System monitoring and alerting"
+            implementation: "Prometheus + Grafana"
+            status: "documented"
+            
+        processing_integrity:
+          - name: "Data Validation"
+            id: "PI1.1"
+            description: "Input validation and sanitization"
+            implementation: "Pydantic models with validation"
+            status: "implemented"
+    
+    # ISO/IEC 27001 (Information Security Management)
+    iso27001:
+      applicable: true
+      version: "2022"
+      
+      controls:
+        A5_organizational:
+          - "A.5.1 - Information security policies"
+          - "A.5.8 - Information security in project management"
+          
+        A8_asset_management:
+          - "A.8.1 - Responsibility for assets"
+          - "A.8.2 - Information classification"
+          - "A.8.3 - Media handling"
+          
+        A12_operations_security:
+          - "A.12.1 - Operational procedures and responsibilities"
+          - "A.12.2 - Protection from malware"
+          - "A.12.6 - Management of technical vulnerabilities"
+    
+    # NIST Cybersecurity Framework
+    nist_csf:
+      version: "1.1"
+      profile: "moderate"
+      
+      functions:
+        identify:
+          categories:
+            - "ID.AM - Asset Management"
+            - "ID.BE - Business Environment"
+            - "ID.GV - Governance"
+            - "ID.RA - Risk Assessment"
+            - "ID.RM - Risk Management Strategy"
+            
+        protect:
+          categories:
+            - "PR.AC - Identity Management and Access Control"
+            - "PR.AT - Awareness and Training"
+            - "PR.DS - Data Security"
+            - "PR.IP - Information Protection Processes"
+            - "PR.MA - Maintenance"
+            - "PR.PT - Protective Technology"
+            
+        detect:
+          categories:
+            - "DE.AE - Anomalies and Events"
+            - "DE.CM - Security Continuous Monitoring"
+            - "DE.DP - Detection Processes"
+            
+        respond:
+          categories:
+            - "RS.RP - Response Planning"
+            - "RS.CO - Communications"
+            - "RS.AN - Analysis"
+            - "RS.MI - Mitigation"
+            - "RS.IM - Improvements"
+            
+        recover:
+          categories:
+            - "RC.RP - Recovery Planning"
+            - "RC.IM - Improvements"
+            - "RC.CO - Communications"
+
+# Quantum-Specific Compliance Requirements
+quantum_compliance:
+  export_controls:
+    # US Export Control (EAR/ITAR)
+    us_export_control:
+      applicable: true
+      classification: "EAR99"  # Most commercial quantum software
+      restrictions:
+        - "No export to sanctioned countries"
+        - "Quantum cryptography may require license"
+        - "Monitor for dual-use applications"
+      
+    # EU Export Control
+    eu_export_control:
+      applicable: true
+      dual_use_regulation: "428/2009"
+      quantum_technology_category: "5A002"
+      
+  data_protection:
+    # GDPR (for EU operations)
+    gdpr:
+      applicable: true
+      data_processing_basis: "legitimate_interest"
+      quantum_specific_considerations:
+        - "Quantum computation may affect pseudonymization"
+        - "Quantum advantage in optimization may reveal patterns"
+        - "Consider quantum-safe cryptography migration"
+        
+    # CCPA (for California operations)
+    ccpa:
+      applicable: true
+      consumer_rights: "supported"
+      quantum_considerations:
+        - "Quantum-enhanced analytics transparency"
+        - "Right to delete in quantum databases"
+      
+  intellectual_property:
+    patent_considerations:
+      - "Quantum algorithm implementations"
+      - "QUBO formulation techniques"
+      - "Hybrid quantum-classical methods"
+      - "Quantum backend abstraction"
+      
+    open_source_compliance:
+      licenses_allowed:
+        - "MIT"
+        - "Apache-2.0"
+        - "BSD-3-Clause"
+        - "BSD-2-Clause"
+        
+      licenses_restricted:
+        - "GPL-3.0"  # Copyleft concerns
+        - "AGPL-3.0"  # Network copyleft
+        
+      quantum_licenses:
+        - name: "Qiskit License"
+          type: "Apache-2.0"
+          quantum_specific_terms: false
+          
+        - name: "D-Wave EULA"
+          type: "proprietary"
+          quantum_specific_terms: true
+          restrictions: "Commercial use terms"
+
+# Compliance Monitoring and Reporting
+monitoring:
+  automated_checks:
+    enabled: true
+    frequency: "daily"
+    
+    checks:
+      - name: "License Compatibility"
+        description: "Verify all dependencies have compatible licenses"
+        tool: "licensecheck"
+        
+      - name: "Vulnerability Scanning"
+        description: "Security vulnerability assessment"
+        tool: "safety + bandit"
+        
+      - name: "Export Control Screening"
+        description: "Check for export-controlled algorithms"
+        tool: "custom_scanner"
+        
+      - name: "Data Flow Analysis"
+        description: "Analyze data processing for privacy compliance"
+        tool: "custom_analyzer"
+        
+  reporting:
+    compliance_dashboard: true
+    automated_reports: true
+    
+    reports:
+      - name: "Monthly Compliance Report"
+        frequency: "monthly"
+        recipients: ["compliance@terragon.ai"]
+        
+      - name: "Quarterly Risk Assessment"
+        frequency: "quarterly"
+        recipients: ["ciso@terragon.ai", "legal@terragon.ai"]
+        
+      - name: "Annual Compliance Audit"
+        frequency: "annually"
+        external_auditor: true
+        
+  evidence_collection:
+    automated: true
+    retention_years: 7
+    
+    artifacts:
+      - "Build logs and provenance"
+      - "Security scan results"
+      - "License compliance reports"
+      - "Access control logs"
+      - "Incident response records"
+      - "Training completion records"
+
+# Risk Management
+risk_management:
+  quantum_specific_risks:
+    - name: "Quantum Advantage Obsolescence"
+      category: "Technology"
+      probability: "medium"
+      impact: "high"
+      mitigation: "Multi-backend support + classical fallback"
+      
+    - name: "Quantum Backend Availability"
+      category: "Operational"
+      probability: "high"
+      impact: "medium"
+      mitigation: "Circuit breaker pattern + local simulation"
+      
+    - name: "Quantum Cryptography Migration"
+      category: "Security"
+      probability: "low"
+      impact: "critical"
+      mitigation: "Crypto-agility design + monitoring"
+      
+    - name: "Export Control Violations"
+      category: "Legal"
+      probability: "low"
+      impact: "critical"
+      mitigation: "Legal review + automated screening"
+      
+  business_risks:
+    - name: "Compliance Violations"
+      category: "Legal"
+      probability: "low"
+      impact: "high"
+      mitigation: "Automated compliance monitoring"
+      
+    - name: "Data Breaches"
+      category: "Security"
+      probability: "medium"
+      impact: "critical"
+      mitigation: "Defense in depth + incident response"
+      
+    - name: "Supply Chain Attacks"
+      category: "Security"
+      probability: "medium"
+      impact: "high"
+      mitigation: "SBOM + dependency scanning + SLSA"
+
+# Audit Trail Configuration
+audit:
+  logging:
+    enabled: true
+    structured: true
+    retention_days: 2555  # 7 years
+    
+    events:
+      - "Authentication and authorization"
+      - "Data access and modification"
+      - "System configuration changes"
+      - "Quantum backend connections"
+      - "Compliance check results"
+      - "Security incidents"
+      
+  immutable_storage:
+    enabled: true
+    backend: "append-only-s3"
+    cryptographic_integrity: true
+    
+  regular_audits:
+    internal_quarterly: true
+    external_annual: true
+    penetration_testing: "annual"

@@ -1,0 +1,123 @@
+# Performance Monitoring Configuration for Quantum Task Planner
+# This configuration enables comprehensive performance tracking and observability
+
+monitoring:
+  enabled: true
+  
+  # Performance Metrics Collection
+  metrics:
+    quantum_execution:
+      track_solve_time: true
+      track_qubo_construction: true
+      track_backend_communication: true
+      track_solution_quality: true
+      
+    memory_usage:
+      track_peak_memory: true
+      track_memory_growth: true
+      profile_large_problems: true
+      memory_threshold_mb: 1000
+      
+    algorithm_performance:
+      track_convergence: true
+      track_iteration_count: true
+      track_optimization_progress: true
+      compare_backends: true
+      
+    system_resources:
+      cpu_utilization: true
+      gpu_utilization: true  # For CUDA-enabled quantum simulators
+      network_latency: true  # For quantum cloud backends
+      
+  # Alerting Configuration
+  alerts:
+    performance_degradation:
+      solve_time_threshold_seconds: 300
+      memory_usage_threshold_mb: 2048
+      quality_degradation_threshold: 0.1
+      
+    quantum_backend_issues:
+      connection_timeout_seconds: 30
+      api_error_threshold: 5
+      queue_time_threshold_minutes: 60
+      
+  # Observability Integration
+  tracing:
+    enabled: true
+    jaeger_endpoint: "http://localhost:14268/api/traces"
+    service_name: "quantum-task-planner"
+    sample_rate: 0.1
+    
+  logging:
+    level: INFO
+    structured: true
+    correlation_id: true
+    performance_logs: true
+    
+  # Benchmarking Configuration
+  benchmarking:
+    automated_regression_testing: true
+    baseline_comparison: true
+    performance_history_retention_days: 90
+    
+    benchmark_suites:
+      - name: "small_problems"
+        agents: [5, 10]
+        tasks: [10, 20]
+        backends: ["simulator", "classical"]
+        
+      - name: "medium_problems"
+        agents: [20, 50]
+        tasks: [50, 100]
+        backends: ["simulator", "dwave"]
+        
+      - name: "large_problems"
+        agents: [100, 200]
+        tasks: [200, 500]
+        backends: ["hybrid", "azure_quantum"]
+        
+  # Data Collection
+  data_retention:
+    metrics_retention_days: 365
+    detailed_traces_retention_days: 30
+    benchmark_results_retention_days: 180
+    
+  export:
+    prometheus:
+      enabled: true
+      port: 8080
+      metrics_path: "/metrics"
+      
+    grafana:
+      dashboard_config: "./monitoring/grafana_dashboard.json"
+      
+    csv_export:
+      enabled: true
+      export_path: "./performance_data/"
+      
+# Development Mode Settings
+development:
+  profiling:
+    enabled: true
+    output_directory: "./profiling_results/"
+    profile_formats: ["cProfile", "py-spy", "memory_profiler"]
+    
+  debugging:
+    quantum_state_visualization: true
+    qubo_matrix_visualization: true
+    solution_path_tracking: true
+    
+# Production Mode Settings  
+production:
+  sampling:
+    enabled: true
+    sample_rate: 0.01  # Sample 1% of requests in production
+    
+  privacy:
+    anonymize_problem_data: true
+    exclude_sensitive_fields: ["agent_names", "task_descriptions"]
+    
+  optimization:
+    async_metrics_collection: true
+    batch_metric_uploads: true
+    compression_enabled: true
