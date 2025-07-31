@@ -1,0 +1,40 @@
+# Code ownership for quantum-inspired-task-planner
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global ownership - all files require review from maintainers
+* @danieleschmidt
+
+# Core quantum optimization code
+/src/quantum_planner/ @danieleschmidt
+
+# Configuration and build files
+/pyproject.toml @danieleschmidt
+/package.json @danieleschmidt
+/Makefile @danieleschmidt
+/Dockerfile @danieleschmidt
+/docker-compose*.yml @danieleschmidt
+
+# Security and compliance
+/SECURITY.md @danieleschmidt
+/.secrets.baseline @danieleschmidt
+/.pre-commit-config.yaml @danieleschmidt
+
+# Documentation
+/docs/ @danieleschmidt
+/README.md @danieleschmidt
+/CONTRIBUTING.md @danieleschmidt
+/CODE_OF_CONDUCT.md @danieleschmidt
+
+# GitHub configuration
+/.github/ @danieleschmidt
+
+# Testing infrastructure
+/tests/ @danieleschmidt
+/benchmarks/ @danieleschmidt
+
+# Scripts and automation
+/scripts/ @danieleschmidt
+
+# Workflow templates (require careful review)
+/workflows-ready-to-deploy/ @danieleschmidt
+/workflows-to-add/ @danieleschmidt
