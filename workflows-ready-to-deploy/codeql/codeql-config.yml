@@ -1,0 +1,38 @@
+# CodeQL Configuration for Quantum Task Planner
+name: "Quantum Task Planner CodeQL Config"
+
+disable-default-queries: false
+
+queries:
+  - uses: security-and-quality
+  - uses: security-extended
+
+# Paths to analyze
+paths:
+  - src/quantum_planner/
+  - scripts/
+
+# Paths to ignore
+paths-ignore:
+  - tests/
+  - docs/
+  - examples/
+  - benchmarks/
+
+# Query filters for Python
+query-filters:
+  - exclude:
+      id: py/unused-import
+  - exclude:
+      id: py/unused-local-variable
+  - include:
+      severity: error
+  - include:
+      security-severity: high
+  - include:
+      security-severity: critical
+
+# Custom queries for quantum computing security
+packs:
+  - codeql/python-queries
+  - codeql/python-security-experimental-queries
