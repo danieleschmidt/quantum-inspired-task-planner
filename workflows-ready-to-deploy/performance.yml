@@ -1,0 +1,296 @@
+# Performance Monitoring Workflow
+name: Performance Monitoring
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run performance tests weekly on Sunday at 1 AM UTC
+    - cron: '0 1 * * 0'
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # ===== Benchmark Tests =====
+  benchmarks:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies
+      run: |
+        poetry config virtualenvs.create false
+        poetry install --with dev,test
+
+    - name: Run benchmarks
+      run: |
+        poetry run pytest tests/benchmarks/ \
+          --benchmark-json=benchmark-results.json \
+          --benchmark-histogram=benchmark-histogram \
+          --benchmark-save=benchmark-$(date +%Y%m%d-%H%M%S) \
+          --verbose
+
+    - name: Store benchmark results
+      uses: benchmark-action/github-action-benchmark@v1
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      with:
+        tool: 'pytest'
+        output-file-path: benchmark-results.json
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        auto-push: true
+        comment-on-alert: true
+        alert-threshold: '150%'
+        fail-on-alert: false
+
+    - name: Upload benchmark artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: benchmark-results
+        path: |
+          benchmark-results.json
+          benchmark-histogram/
+
+  # ===== Memory Profiling =====
+  memory-profile:
+    name: Memory Profiling
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies
+      run: |
+        poetry config virtualenvs.create false
+        poetry install --with dev,test
+        pip install memory-profiler psutil
+
+    - name: Run memory profiling
+      run: |
+        poetry run python tests/benchmarks/memory_profile.py
+
+    - name: Generate memory report
+      run: |
+        echo "## Memory Profiling Report" > memory-report.md
+        echo "" >> memory-report.md
+        echo "### Peak Memory Usage" >> memory-report.md
+        echo "" >> memory-report.md
+        if [ -f memory_profile.log ]; then
+          echo '```' >> memory-report.md
+          cat memory_profile.log >> memory-report.md
+          echo '```' >> memory-report.md
+        fi
+
+    - name: Upload memory profile
+      uses: actions/upload-artifact@v3
+      with:
+        name: memory-profile
+        path: |
+          memory_profile.log
+          memory-report.md
+
+  # ===== Load Testing =====
+  load-test:
+    name: Load Testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies
+      run: |
+        poetry config virtualenvs.create false
+        poetry install --with dev,test
+        pip install locust
+
+    - name: Start quantum planner service
+      run: |
+        poetry run python -m quantum_planner.server &
+        echo $! > server.pid
+        sleep 5
+      continue-on-error: true
+
+    - name: Run load tests
+      run: |
+        poetry run locust \
+          --host=http://localhost:8000 \
+          --users=10 \
+          --spawn-rate=2 \
+          --run-time=60s \
+          --headless \
+          --csv=load-test-results
+      continue-on-error: true
+
+    - name: Stop service
+      run: |
+        if [ -f server.pid ]; then
+          kill $(cat server.pid) || true
+        fi
+
+    - name: Upload load test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: load-test-results
+        path: load-test-results*
+
+  # ===== Performance Regression Detection =====
+  regression-test:
+    name: Performance Regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - name: Checkout PR branch
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies
+      run: |
+        poetry config virtualenvs.create false
+        poetry install --with dev,test
+
+    - name: Run PR benchmarks
+      run: |
+        poetry run pytest tests/benchmarks/ \
+          --benchmark-json=pr-benchmark.json \
+          --benchmark-only
+
+    - name: Checkout main branch
+      uses: actions/checkout@v4
+      with:
+        ref: main
+        clean: false
+
+    - name: Run main benchmarks
+      run: |
+        poetry run pytest tests/benchmarks/ \
+          --benchmark-json=main-benchmark.json \
+          --benchmark-only
+
+    - name: Compare benchmarks
+      run: |
+        poetry run python scripts/compare_benchmarks.py \
+          main-benchmark.json pr-benchmark.json > benchmark-comparison.md
+
+    - name: Comment PR with benchmark results
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const comparison = fs.readFileSync('benchmark-comparison.md', 'utf8');
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `## Performance Benchmark Comparison\n\n${comparison}`
+          });
+
+  # ===== Quantum Backend Performance =====
+  quantum-performance:
+    name: Quantum Backend Performance
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name == 'schedule'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies with quantum backends
+      run: |
+        poetry config virtualenvs.create false
+        poetry install --with dev,test --extras "all"
+
+    - name: Test simulator performance
+      run: |
+        poetry run python -m quantum_planner.benchmarks.simulator_performance
+
+    - name: Generate performance report
+      run: |
+        echo "## Quantum Backend Performance Report" > quantum-performance.md
+        echo "" >> quantum-performance.md
+        echo "### Simulator Performance" >> quantum-performance.md
+        echo "" >> quantum-performance.md
+        if [ -f simulator_performance.json ]; then
+          python -c "
+          import json
+          with open('simulator_performance.json') as f:
+              data = json.load(f)
+          print('| Backend | Problem Size | Time (s) | Memory (MB) |')
+          print('|---------|--------------|-----------|-------------|')
+          for result in data['results']:
+              print(f\"| {result['backend']} | {result['size']} | {result['time']:.2f} | {result['memory']:.1f} |\")
+          " >> quantum-performance.md
+        fi
+
+    - name: Upload performance report
+      uses: actions/upload-artifact@v3
+      with:
+        name: quantum-performance
+        path: |
+          quantum-performance.md
+          simulator_performance.json
