@@ -1,0 +1,184 @@
+# OpenTelemetry Configuration for Quantum Task Planner
+# Provides distributed tracing and metrics collection for quantum applications
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+  # Python application metrics
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'quantum-planner'
+          static_configs:
+            - targets: ['localhost:8080']
+          scrape_interval: 15s
+          metrics_path: '/metrics'
+
+  # System metrics
+  hostmetrics:
+    collection_interval: 10s
+    scrapers:
+      cpu:
+        metrics:
+          system.cpu.utilization:
+            enabled: true
+      memory:
+        metrics:
+          system.memory.utilization:
+            enabled: true
+      disk:
+        metrics:
+          system.disk.io:
+            enabled: true
+      network:
+        metrics:
+          system.network.io:
+            enabled: true
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+    send_batch_max_size: 2048
+
+  # Resource detection for quantum backends
+  resource:
+    detectors: [env, system]
+    timeout: 2s
+    override: false
+
+  # Memory limiter to prevent OOM
+  memory_limiter:
+    limit_mib: 512
+    spike_limit_mib: 128
+    check_interval: 5s
+
+  # Quantum-specific attribute processing
+  attributes:
+    actions:
+      - key: quantum.backend.type
+        action: upsert
+        from_attribute: backend
+      - key: quantum.problem.size
+        action: upsert
+        from_attribute: problem_size
+      - key: quantum.solution.quality
+        action: upsert
+        from_attribute: solution_quality
+
+exporters:
+  # Jaeger for distributed tracing
+  jaeger:
+    endpoint: http://localhost:14268/api/traces
+    tls:
+      insecure: true
+
+  # Prometheus for metrics
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    metric_expiration: 180m
+    resource_to_telemetry_conversion:
+      enabled: true
+
+  # Console exporter for development
+  logging:
+    loglevel: info
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+  # OTLP exporter for cloud backends
+  otlp:
+    endpoint: "${OTEL_EXPORTER_OTLP_ENDPOINT}"
+    headers:
+      api-key: "${OTEL_EXPORTER_OTLP_HEADERS}"
+    compression: gzip
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource, attributes]
+      exporters: [jaeger, otlp, logging]
+
+    metrics:
+      receivers: [otlp, prometheus, hostmetrics]
+      processors: [memory_limiter, batch, resource, attributes]
+      exporters: [prometheus, otlp, logging]
+
+  extensions: [health_check, pprof, zpages]
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+    
+  pprof:
+    endpoint: 0.0.0.0:1777
+    
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+# Quantum-specific configuration
+quantum:
+  instrumentation:
+    # Automatic instrumentation for quantum libraries
+    libraries:
+      - dwave-ocean-sdk
+      - qiskit
+      - azure-quantum
+      - cirq
+      
+    # Custom spans for quantum operations
+    custom_spans:
+      - qubo_construction
+      - quantum_annealing
+      - classical_postprocessing
+      - solution_validation
+      
+    # Metrics collection
+    metrics:
+      solve_duration:
+        histogram: true
+        buckets: [0.1, 0.5, 1.0, 5.0, 10.0, 30.0, 60.0, 300.0]
+        
+      memory_usage:
+        gauge: true
+        unit: "bytes"
+        
+      problem_size:
+        histogram: true
+        buckets: [10, 50, 100, 500, 1000, 5000]
+        
+      solution_quality:
+        histogram: true
+        buckets: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+
+# Environment-specific configurations
+environments:
+  development:
+    logging:
+      level: DEBUG
+      export_interval: 1s
+    traces:
+      sample_rate: 1.0
+      
+  staging:
+    logging:
+      level: INFO
+      export_interval: 5s
+    traces:
+      sample_rate: 0.1
+      
+  production:
+    logging:
+      level: WARN
+      export_interval: 30s
+    traces:
+      sample_rate: 0.01
+    resource_limits:
+      memory_limit_mib: 256
+      cpu_limit_percent: 10

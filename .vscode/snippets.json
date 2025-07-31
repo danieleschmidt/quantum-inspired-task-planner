@@ -1,0 +1,160 @@
+{
+  "Quantum Planner Agent": {
+    "prefix": "qp-agent",
+    "body": [
+      "Agent(",
+      "    id=\"${1:agent_id}\",",
+      "    skills=[\"${2:skill1}\", \"${3:skill2}\"],",
+      "    capacity=${4:3}",
+      ")"
+    ],
+    "description": "Create a Quantum Planner Agent"
+  },
+  
+  "Quantum Planner Task": {
+    "prefix": "qp-task",
+    "body": [
+      "Task(",
+      "    id=\"${1:task_id}\",",
+      "    required_skills=[\"${2:skill}\"],",
+      "    priority=${3:5},",
+      "    duration=${4:2}",
+      ")"
+    ],
+    "description": "Create a Quantum Planner Task"
+  },
+  
+  "Time Window Task": {
+    "prefix": "qp-timewindow",
+    "body": [
+      "TimeWindowTask(",
+      "    id=\"${1:task_id}\",",
+      "    required_skills=[\"${2:skill}\"],",
+      "    earliest_start=${3:0},",
+      "    latest_finish=${4:10},",
+      "    duration=${5:2}",
+      ")"
+    ],
+    "description": "Create a Time Window Task"
+  },
+  
+  "Quantum Task Planner": {
+    "prefix": "qp-planner",
+    "body": [
+      "planner = QuantumTaskPlanner(",
+      "    backend=\"${1:auto}\",",
+      "    fallback=\"${2:simulated_annealing}\"",
+      ")",
+      "",
+      "solution = planner.assign(",
+      "    agents=${3:agents},",
+      "    tasks=${4:tasks},",
+      "    objective=\"${5:minimize_makespan}\",",
+      "    constraints={",
+      "        \"skill_match\": True,",
+      "        \"capacity_limit\": True",
+      "    }",
+      ")"
+    ],
+    "description": "Create a Quantum Task Planner instance"
+  },
+  
+  "QUBO Builder": {
+    "prefix": "qp-qubo",
+    "body": [
+      "from quantum_planner.formulation import QUBOBuilder",
+      "",
+      "builder = QUBOBuilder()",
+      "builder.add_objective(",
+      "    type=\"${1:minimize_makespan}\",",
+      "    weight=${2:1.0}",
+      ")",
+      "builder.add_constraint(",
+      "    type=\"${3:one_task_one_agent}\",",
+      "    penalty=${4:100}",
+      ")",
+      "",
+      "Q = builder.build()"
+    ],
+    "description": "Create a QUBO formulation"
+  },
+  
+  "Quantum Backend Configuration": {
+    "prefix": "qp-backend",
+    "body": [
+      "from quantum_planner.backends import ${1:DWaveBackend}",
+      "",
+      "backend = ${1:DWaveBackend}(",
+      "    ${2:token=\"your-token\"},",
+      "    ${3:solver=\"Advantage_system6.1\"},",
+      "    ${4:num_reads=1000}",
+      ")",
+      "",
+      "planner = QuantumTaskPlanner(backend=backend)"
+    ],
+    "description": "Configure quantum backend"
+  },
+  
+  "Test Function": {
+    "prefix": "qp-test",
+    "body": [
+      "def test_${1:function_name}():",
+      "    \"\"\"Test ${2:description}.\"\"\"",
+      "    # Arrange",
+      "    ${3:# Setup test data}",
+      "    ",
+      "    # Act",
+      "    ${4:# Execute function}",
+      "    ",
+      "    # Assert",
+      "    ${5:assert result == expected}",
+      "    ${0}"
+    ],
+    "description": "Create a test function"
+  },
+  
+  "Benchmark Function": {
+    "prefix": "qp-benchmark",
+    "body": [
+      "def test_${1:function_name}_benchmark(benchmark):",
+      "    \"\"\"Benchmark ${2:description}.\"\"\"",
+      "    ${3:# Setup}",
+      "    ",
+      "    result = benchmark(${4:function_to_benchmark}, ${5:args})",
+      "    ",
+      "    ${6:# Assertions}",
+      "    ${0}"
+    ],
+    "description": "Create a benchmark test"
+  },
+  
+  "Custom Constraint": {
+    "prefix": "qp-constraint",
+    "body": [
+      "from quantum_planner import CustomConstraint",
+      "",
+      "class ${1:CustomConstraintName}(CustomConstraint):",
+      "    \"\"\"${2:Description of constraint}.\"\"\"",
+      "    ",
+      "    def to_qubo_terms(self, variables):",
+      "        \"\"\"Convert constraint to QUBO terms.\"\"\"",
+      "        terms = {}",
+      "        ",
+      "        ${3:# Implementation}",
+      "        ",
+      "        return terms"
+    ],
+    "description": "Create a custom constraint class"
+  },
+  
+  "Quantum Import Block": {
+    "prefix": "qp-imports",
+    "body": [
+      "from quantum_planner import QuantumTaskPlanner, Agent, Task",
+      "from quantum_planner.backends import ${1:SimulatorBackend}",
+      "from quantum_planner.formulation import QUBOBuilder",
+      "${0}"
+    ],
+    "description": "Common Quantum Planner imports"
+  }
+}
