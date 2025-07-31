@@ -1,0 +1,55 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":separatePatchReleases"
+  ],
+  "timezone": "America/New_York",
+  "schedule": ["before 6am on monday"],
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 2,
+  "updateNotScheduled": false,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on monday"]
+  },
+  "packageRules": [
+    {
+      "matchDepTypes": ["devDependencies"],
+      "automerge": true,
+      "major": {
+        "automerge": false
+      }
+    },
+    {
+      "matchPackagePatterns": ["^pytest", "^black", "^ruff"],
+      "automerge": true,
+      "schedule": ["at any time"]
+    },
+    {
+      "matchPackagePatterns": ["^dwave", "^qiskit", "^azure-quantum"],
+      "reviewersFromCodeOwners": true,
+      "addLabels": ["quantum-backend"],
+      "automerge": false
+    },
+    {
+      "matchPackagePatterns": ["^numpy", "^scipy", "^networkx"],
+      "groupName": "scientific computing",
+      "automerge": true
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "schedule": ["at any time"],
+    "automerge": true,
+    "addLabels": ["security"]
+  },
+  "osvVulnerabilityAlerts": true,
+  "dependencyDashboardAutoclose": true,
+  "commitMessagePrefix": "⬆️",
+  "commitMessageAction": "update",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "to {{newVersion}}"
+}
