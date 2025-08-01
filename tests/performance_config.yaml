@@ -1,0 +1,56 @@
+# Performance testing configuration
+
+benchmarks:
+  timeout: 300  # 5 minutes max per benchmark
+  min_rounds: 3
+  max_rounds: 10
+  warmup_rounds: 1
+  
+problem_sizes:
+  small: 
+    agents: 5
+    tasks: 8
+    expected_time: 1.0
+  medium:
+    agents: 20  
+    tasks: 30
+    expected_time: 5.0
+  large:
+    agents: 50
+    tasks: 75
+    expected_time: 15.0
+  xlarge:
+    agents: 100
+    tasks: 150
+    expected_time: 60.0
+
+backends:
+  simulator:
+    enabled: true
+    timeout: 30
+  simulated_annealing:
+    enabled: true
+    timeout: 60
+  quantum:
+    enabled: false  # Requires credentials
+    timeout: 120
+
+memory_thresholds:
+  small_problem: 100MB
+  medium_problem: 500MB
+  large_problem: 2GB
+  xlarge_problem: 8GB
+
+quality_metrics:
+  optimality_gap_threshold: 0.05  # 5% from optimal
+  feasibility_threshold: 0.99     # 99% problems should be feasible
+  
+performance_regression:
+  slowdown_threshold: 1.5  # Alert if 50% slower than baseline
+  memory_increase_threshold: 1.3  # Alert if 30% more memory
+
+reporting:
+  output_format: json
+  include_plots: true
+  export_to_file: true
+  comparison_baseline: latest_release

@@ -112,6 +112,19 @@ build: clean ## Build package
 	poetry build
 	@echo "$(GREEN)✓ Package built in dist/$(NC)"
 
+validate-build: build ## Validate build artifacts
+	@echo "$(GREEN)Validating build artifacts...$(NC)"
+	./build/scripts/validate-build.sh
+	@echo "$(GREEN)✓ Build validation complete$(NC)"
+
+generate-sbom: ## Generate Software Bill of Materials
+	@echo "$(GREEN)Generating SBOM...$(NC)"
+	python build/scripts/generate-sbom.py
+	@echo "$(GREEN)✓ SBOM generated$(NC)"
+
+build-complete: build validate-build generate-sbom ## Complete build with validation and SBOM
+	@echo "$(GREEN)✓ Complete build process finished$(NC)"
+
 release-check: ## Check if package is ready for release
 	@echo "$(GREEN)Checking package for release...$(NC)"
 	poetry check

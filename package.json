@@ -5,9 +5,19 @@
   "scripts": {
     "dev": "make dev",
     "test": "make test-all",
+    "test:unit": "make test-unit",
+    "test:integration": "make test-integration",
+    "test:performance": "make test-performance",
     "lint": "make lint",
+    "lint:fix": "make lint-fix",
     "format": "make format",
-    "build": "make build"
+    "format:check": "make format-check",
+    "typecheck": "make typecheck",
+    "build": "make build",
+    "clean": "make clean",
+    "security-check": "make security-check",
+    "docs": "make docs",
+    "setup": "make setup"
   },
   "keywords": ["quantum", "optimization", "scheduling", "QUBO", "annealing"],
   "author": "Daniel Schmidt <daniel@terragon.ai>",

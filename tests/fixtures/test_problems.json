@@ -1,0 +1,119 @@
+{
+  "small_problems": {
+    "basic_assignment": {
+      "agents": [
+        {"id": "agent1", "skills": ["python"], "capacity": 2},
+        {"id": "agent2", "skills": ["javascript"], "capacity": 1}
+      ],
+      "tasks": [
+        {"id": "task1", "required_skills": ["python"], "priority": 5, "duration": 1},
+        {"id": "task2", "required_skills": ["javascript"], "priority": 3, "duration": 2}
+      ],
+      "expected_makespan": 2,
+      "expected_assignments": {"task1": "agent1", "task2": "agent2"}
+    },
+    "skill_mismatch": {
+      "agents": [
+        {"id": "agent1", "skills": ["python"], "capacity": 2}
+      ],
+      "tasks": [
+        {"id": "task1", "required_skills": ["javascript"], "priority": 5, "duration": 1}
+      ],
+      "should_fail": true,
+      "failure_reason": "no_feasible_assignment"
+    },
+    "capacity_constraint": {
+      "agents": [
+        {"id": "agent1", "skills": ["python"], "capacity": 1}
+      ],
+      "tasks": [
+        {"id": "task1", "required_skills": ["python"], "priority": 5, "duration": 1},
+        {"id": "task2", "required_skills": ["python"], "priority": 4, "duration": 1}
+      ],
+      "expected_makespan": 2,
+      "expected_assignments": {"task1": "agent1", "task2": "agent1"}
+    }
+  },
+  "medium_problems": {
+    "development_team": {
+      "agents": [
+        {"id": "frontend_dev", "skills": ["react", "typescript"], "capacity": 3},
+        {"id": "backend_dev", "skills": ["python", "postgres"], "capacity": 4},
+        {"id": "fullstack_dev", "skills": ["react", "python"], "capacity": 2},
+        {"id": "devops", "skills": ["docker", "kubernetes"], "capacity": 2}
+      ],
+      "tasks": [
+        {"id": "ui_component", "required_skills": ["react"], "priority": 8, "duration": 3},
+        {"id": "api_endpoint", "required_skills": ["python"], "priority": 7, "duration": 2},
+        {"id": "database_migration", "required_skills": ["postgres"], "priority": 6, "duration": 1},
+        {"id": "type_definitions", "required_skills": ["typescript"], "priority": 5, "duration": 1},
+        {"id": "deployment", "required_skills": ["docker"], "priority": 4, "duration": 2},
+        {"id": "monitoring", "required_skills": ["kubernetes"], "priority": 3, "duration": 1}
+      ],
+      "constraints": {
+        "precedence": {
+          "deployment": ["api_endpoint", "ui_component"],
+          "monitoring": ["deployment"]
+        }
+      }
+    }
+  },
+  "large_problems": {
+    "research_team": {
+      "agents": [
+        {"id": "ml_researcher_1", "skills": ["pytorch", "nlp"], "capacity": 3},
+        {"id": "ml_researcher_2", "skills": ["tensorflow", "cv"], "capacity": 3},
+        {"id": "ml_researcher_3", "skills": ["pytorch", "rl"], "capacity": 2},
+        {"id": "data_engineer", "skills": ["spark", "etl"], "capacity": 4},
+        {"id": "ml_engineer", "skills": ["deployment", "optimization"], "capacity": 3},
+        {"id": "research_assistant", "skills": ["data_analysis", "visualization"], "capacity": 2}
+      ],
+      "tasks": [
+        {"id": "data_collection", "required_skills": ["etl"], "priority": 9, "duration": 4},
+        {"id": "data_preprocessing", "required_skills": ["spark"], "priority": 8, "duration": 3},
+        {"id": "model_training_nlp", "required_skills": ["pytorch", "nlp"], "priority": 7, "duration": 5},
+        {"id": "model_training_cv", "required_skills": ["tensorflow", "cv"], "priority": 7, "duration": 5},
+        {"id": "rl_experiment", "required_skills": ["pytorch", "rl"], "priority": 6, "duration": 4},
+        {"id": "model_evaluation", "required_skills": ["data_analysis"], "priority": 5, "duration": 2},
+        {"id": "visualization", "required_skills": ["visualization"], "priority": 4, "duration": 2},
+        {"id": "model_optimization", "required_skills": ["optimization"], "priority": 6, "duration": 3},
+        {"id": "deployment_prep", "required_skills": ["deployment"], "priority": 5, "duration": 2}
+      ],
+      "constraints": {
+        "precedence": {
+          "data_preprocessing": ["data_collection"],
+          "model_training_nlp": ["data_preprocessing"],
+          "model_training_cv": ["data_preprocessing"],
+          "rl_experiment": ["data_preprocessing"],
+          "model_evaluation": ["model_training_nlp", "model_training_cv"],
+          "model_optimization": ["model_evaluation"],
+          "deployment_prep": ["model_optimization"]
+        }
+      }
+    }
+  },
+  "benchmark_problems": {
+    "scalability_test_50": {
+      "description": "50 agents, 75 tasks for scalability testing",
+      "agents": "generated",
+      "tasks": "generated",
+      "num_agents": 50,
+      "num_tasks": 75,
+      "skill_diversity": 10,
+      "max_capacity": 5,
+      "expected_solve_time_quantum": 5.0,
+      "expected_solve_time_classical": 30.0
+    },
+    "scalability_test_100": {
+      "description": "100 agents, 150 tasks for performance limits",
+      "agents": "generated",
+      "tasks": "generated",
+      "num_agents": 100,
+      "num_tasks": 150,
+      "skill_diversity": 15,
+      "max_capacity": 8,
+      "expected_solve_time_quantum": 8.0,
+      "expected_solve_time_classical": 120.0
+    }
+  }
+}
