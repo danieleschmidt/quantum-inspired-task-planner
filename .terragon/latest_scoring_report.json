@@ -1,0 +1,100 @@
+{
+  "summary": {
+    "total_tasks": 5,
+    "high_priority_tasks": 0,
+    "medium_priority_tasks": 0,
+    "low_priority_tasks": 5,
+    "average_score": 9.799296746020834,
+    "max_score": 25.711308000000002,
+    "min_score": 1.6234272301041666
+  },
+  "category_breakdown": {
+    "security": {
+      "count": 1,
+      "average_score": 25.711308000000002,
+      "percentage": 20.0
+    },
+    "quantum_optimization": {
+      "count": 1,
+      "average_score": 13.271238750000004,
+      "percentage": 20.0
+    },
+    "performance": {
+      "count": 1,
+      "average_score": 5.540416,
+      "percentage": 20.0
+    },
+    "technical_debt": {
+      "count": 1,
+      "average_score": 2.850093749999999,
+      "percentage": 20.0
+    },
+    "research": {
+      "count": 1,
+      "average_score": 1.6234272301041666,
+      "percentage": 20.0
+    }
+  },
+  "quantum_analysis": {
+    "quantum_tasks_count": 5,
+    "quantum_percentage": 100.0,
+    "average_quantum_boost": 1.615137
+  },
+  "top_priorities": [
+    {
+      "rank": 1,
+      "task_id": "SEC-VULN-001",
+      "title": "Fix Critical Security Vulnerability in Quantum Credential Handler",
+      "category": "security",
+      "score": 25.711308000000002,
+      "explanation": "Priority: LOW (Score: 25.7) | \u2728 Quantum optimization opportunity (+74% boost) | \ud83d\udea8 Critical urgency | \ud83d\udd12 Security improvement | \ud83d\udcc8 High business value/effort ratio | \ud83d\udd2c Quantum Security enhancement"
+    },
+    {
+      "rank": 2,
+      "task_id": "QUBO-OPT-001",
+      "title": "Optimize QUBO Matrix Construction Performance",
+      "category": "quantum_optimization",
+      "score": 13.271238750000004,
+      "explanation": "Priority: LOW (Score: 13.3) | \u2728 Quantum optimization opportunity (+90% boost) | \ud83d\udd2c Qubo Optimization enhancement"
+    },
+    {
+      "rank": 3,
+      "task_id": "PERF-REG-001",
+      "title": "Address Performance Regression in Classical Fallback",
+      "category": "performance",
+      "score": 5.540416,
+      "explanation": "Priority: LOW (Score: 5.5) | \u2728 Quantum optimization opportunity (+42% boost) | \ud83d\udd2c Classical Fallbacks enhancement"
+    },
+    {
+      "rank": 4,
+      "task_id": "TECH-DEBT-001",
+      "title": "Refactor Legacy QUBO Constraint Handling",
+      "category": "technical_debt",
+      "score": 2.850093749999999,
+      "explanation": "Priority: LOW (Score: 2.9) | \u2728 Quantum optimization opportunity (+50% boost) | \ud83d\udd2c Qubo Optimization enhancement"
+    },
+    {
+      "rank": 5,
+      "task_id": "INNOV-RES-001",
+      "title": "Integrate Latest QAOA Algorithm Research",
+      "category": "research",
+      "score": 1.6234272301041666,
+      "explanation": "Priority: LOW (Score: 1.6) | \u2728 Quantum optimization opportunity (+51% boost) | \ud83d\udd2c Research Integration enhancement"
+    }
+  ],
+  "recommendations": [
+    "\u26a1 5 quantum optimization opportunities identified"
+  ],
+  "model_info": {
+    "weights": {
+      "wsjf": 0.35,
+      "ice": 0.25,
+      "technical_debt": 0.25,
+      "quantum_boost": 0.15
+    },
+    "quantum_boost_factors": {},
+    "learning_rate": 0.1,
+    "historical_outcomes_count": 0,
+    "export_timestamp": "2025-08-01T15:09:21.142146"
+  }
+}
