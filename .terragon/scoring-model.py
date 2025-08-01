@@ -1,746 +1,1056 @@
 #!/usr/bin/env python3
 """
-Terragon Advanced Scoring Model
-==============================
+Terragon Autonomous SDLC Value Discovery Scoring Model
+Advanced Hybrid Scoring Algorithm (WSJF + ICE + Technical Debt + Quantum Boost)
 
-Hybrid WSJF + ICE + Technical Debt scoring algorithm with quantum computing domain expertise.
-Implements adaptive prioritization for advanced quantum computing repositories.
+This module implements an advanced scoring system that combines multiple proven
+frameworks to prioritize work items for quantum computing repositories.
 
-This model combines:
-- WSJF (Weighted Shortest Job First) for value/effort optimization
-- ICE (Impact, Confidence, Ease) for strategic prioritization
-- Technical Debt scoring for maintenance prioritization
-- Quantum Computing domain-specific boost factors
+Scoring Components:
+- WSJF (35%): Weighted Shortest Job First (SAFe methodology)
+- ICE (25%): Impact, Confidence, Ease framework  
+- Technical Debt (25%): Maintenance and quality debt assessment
+- Quantum Boost (15%): Domain-specific quantum computing adjustments
 
-Version: 2.0.0
-Domain: Quantum Computing & Task Optimization
-Maturity: Advanced Repository (88%)
+Author: Terragon Autonomous SDLC System
+Version: 2.1.0
 """
 
 import json
 import math
-import logging
+import yaml
+import numpy as np
 from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional, Any, Union
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-import yaml
+import logging
+import hashlib
 import re
-
+from collections import defaultdict
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 class TaskCategory(Enum):
-    """Task categories with domain-specific classification."""
-    SECURITY = "security"
-    PERFORMANCE = "performance" 
+    """Task categories with quantum computing specialization."""
     QUANTUM_OPTIMIZATION = "quantum_optimization"
-    TECHNICAL_DEBT = "technical_debt"
-    INNOVATION = "innovation"
-    MAINTENANCE = "maintenance"
-    INTEGRATION = "integration"
-    RESEARCH = "research"
-
-
-class UrgencyLevel(Enum):
-    """Urgency classification for tasks."""
-    CRITICAL = "critical"      # Must fix immediately
-    HIGH = "high"             # Fix within 1 week
-    MEDIUM = "medium"         # Fix within 1 month
-    LOW = "low"               # Fix when convenient
-
-
-class QuantumDomain(Enum):
-    """Quantum computing domain areas."""
-    QUBO_OPTIMIZATION = "qubo_optimization"
-    QUANTUM_BACKENDS = "quantum_backends"
+    BACKEND_INTEGRATION = "backend_integration"
     HYBRID_ALGORITHMS = "hybrid_algorithms"
-    CLASSICAL_FALLBACKS = "classical_fallbacks"
-    PERFORMANCE_TUNING = "performance_tuning"
     QUANTUM_SECURITY = "quantum_security"
+    PERFORMANCE_OPTIMIZATION = "performance_optimization"
+    TECHNICAL_DEBT = "technical_debt"
     RESEARCH_INTEGRATION = "research_integration"
+    DOCUMENTATION = "documentation"
 
+class Priority(Enum):
+    """Priority levels for tasks."""
+    CRITICAL = 10
+    HIGH = 8
+    MEDIUM = 6
+    LOW = 4
+    MINIMAL = 2
+
+class QuantumDomainType(Enum):
+    """Quantum computing domain classifications."""
+    QUBO_OPTIMIZATION = "qubo_optimization"
+    QUANTUM_BACKEND = "quantum_backend"
+    HYBRID_ALGORITHMS = "hybrid_algorithms"
+    QUANTUM_SECURITY = "quantum_security"
+    ERROR_MITIGATION = "error_mitigation"
+    QUANTUM_ML = "quantum_machine_learning"
+    QUANTUM_NETWORKING = "quantum_networking"
 
 @dataclass
-class TaskMetrics:
-    """Comprehensive metrics for a discovered task."""
-    
-    # Basic task information
-    task_id: str
+class TaskItem:
+    """Represents a discoverable work item."""
+    id: str
     title: str
     description: str
     category: TaskCategory
-    urgency: UrgencyLevel
+    source: str  # git_history, static_analysis, issue_tracker, etc.
     
-    # WSJF Components (0-10 scale)
-    user_business_value: float = 5.0
-    time_criticality: float = 5.0
-    risk_reduction: float = 5.0
-    job_size: float = 5.0  # Effort estimate (higher = more effort)
+    # WSJF Components
+    user_business_value: float = 0.0    # 1-10 scale
+    time_criticality: float = 0.0       # 1-10 scale  
+    risk_reduction: float = 0.0         # 1-10 scale
+    opportunity_enablement: float = 0.0 # 1-10 scale
+    job_size_estimate: float = 1.0      # Story points or ideal days
     
-    # ICE Components (0-10 scale)
-    impact: float = 5.0
-    confidence: float = 5.0
-    ease: float = 5.0  # Implementation ease (higher = easier)
+    # ICE Components
+    impact: float = 0.0                 # 1-10 scale
+    confidence: float = 0.0             # 1-10 scale (execution confidence)  
+    ease: float = 0.0                   # 1-10 scale (implementation ease)
     
-    # Technical Debt Components (0-10 scale)
-    code_complexity: float = 0.0
-    security_vulnerability: float = 0.0
-    performance_impact: float = 0.0
-    maintainability_impact: float = 0.0
-    test_coverage_gap: float = 0.0
+    # Technical Debt Components
+    debt_impact: float = 0.0            # Hours saved by addressing debt
+    debt_interest: float = 0.0          # Future cost if not addressed
+    hotspot_multiplier: float = 1.0     # 1-5x based on code churn/complexity
     
-    # Quantum-specific factors
-    quantum_domain: Optional[QuantumDomain] = None
-    quantum_performance_impact: float = 0.0
-    quantum_cost_impact: float = 0.0
-    quantum_research_value: float = 0.0
+    # Quantum Computing Specific
+    quantum_domain: Optional[QuantumDomainType] = None
+    quantum_relevance: float = 0.0      # 0-1 scale
     
-    # Discovery metadata
-    discovered_by: str = "terragon-scanner"
-    discovery_date: datetime = field(default_factory=datetime.now)
-    source_signals: List[str] = field(default_factory=list)
-    confidence_score: float = 0.8
+    # Metadata
+    created_at: datetime = field(default_factory=datetime.now)
+    updated_at: datetime = field(default_factory=datetime.now)
+    file_paths: List[str] = field(default_factory=list)
+    dependencies: List[str] = field(default_factory=list)
+    estimated_effort_hours: float = 1.0
+    
+    # Scoring results (populated by scorer)
+    wsjf_score: float = 0.0
+    ice_score: float = 0.0
+    tech_debt_score: float = 0.0
+    quantum_boost: float = 0.0
+    composite_score: float = 0.0
+    
+    # Risk assessment
+    risk_factors: List[str] = field(default_factory=list)
+    risk_score: float = 0.0             # 0-1 scale
     
     # Execution metadata
-    estimated_effort_hours: float = 4.0
-    required_approvals: List[str] = field(default_factory=list)
-    dependencies: List[str] = field(default_factory=list)
-    auto_executable: bool = True
-
+    auto_executable: bool = False
+    approval_required: List[str] = field(default_factory=list)
 
 @dataclass
 class ScoringWeights:
-    """Configurable weights for the hybrid scoring model."""
+    """Configurable scoring weights."""
     wsjf: float = 0.35
     ice: float = 0.25
     technical_debt: float = 0.25
     quantum_boost: float = 0.15
-    
-    # WSJF sub-weights
-    wsjf_user_value: float = 0.3
-    wsjf_time_criticality: float = 0.3
-    wsjf_risk_reduction: float = 0.2
-    wsjf_job_size: float = 0.2
-    
-    # ICE sub-weights
-    ice_impact: float = 0.4
-    ice_confidence: float = 0.3
-    ice_ease: float = 0.3
-    
-    # Technical debt sub-weights
-    td_complexity: float = 0.25
-    td_security: float = 0.30
-    td_performance: float = 0.20
-    td_maintainability: float = 0.15
-    td_test_coverage: float = 0.10
 
+@dataclass 
+class ScoringThresholds:
+    """Scoring thresholds and multipliers."""
+    min_composite_score: float = 15.0
+    max_risk_factor: float = 0.75
+    security_multiplier: float = 2.0
+    compliance_multiplier: float = 1.8
+    performance_multiplier: float = 1.6
+    quantum_multiplier: float = 1.5
+
+@dataclass
+class QuantumDomainBoosts:
+    """Quantum computing domain-specific priority boosts."""
+    qubo_optimization: float = 1.5
+    quantum_backend: float = 1.4  
+    hybrid_algorithms: float = 1.3
+    quantum_security: float = 1.6
+    error_mitigation: float = 1.4
+    quantum_machine_learning: float = 1.3
+    quantum_networking: float = 1.2
 
 class AdvancedScoringModel:
     """
-    Advanced scoring model for Terragon value discovery system.
+    Advanced hybrid scoring model for quantum computing repositories.
     
-    Combines WSJF, ICE, and Technical Debt scoring with quantum computing
-    domain expertise and adaptive learning capabilities.
+    Combines WSJF, ICE, Technical Debt, and Quantum Domain expertise
+    to intelligently prioritize work items for maximum value delivery.
     """
     
     def __init__(self, config_path: Optional[str] = None):
         """Initialize the scoring model with configuration."""
         self.config_path = config_path or ".terragon/config.yaml"
-        self.weights = ScoringWeights()
-        self.quantum_boost_factors = {}
-        self.historical_outcomes = []
-        self.learning_rate = 0.1
-        self.load_configuration()
-    
-    def load_configuration(self) -> None:
-        """Load configuration from Terragon config file."""
-        try:
-            config_file = Path(self.config_path)
-            if config_file.exists():
-                with open(config_file, 'r') as f:
-                    config = yaml.safe_load(f)
-                
-                # Load scoring weights
-                scoring_config = config.get('prioritization', {})
-                weights_config = scoring_config.get('scoring_weights', {})
-                
-                self.weights.wsjf = weights_config.get('wsjf', self.weights.wsjf)
-                self.weights.ice = weights_config.get('ice', self.weights.ice)
-                self.weights.technical_debt = weights_config.get('technical_debt', self.weights.technical_debt)
-                self.weights.quantum_boost = weights_config.get('quantum_boost', self.weights.quantum_boost)
-                
-                # Load quantum boost factors
-                self.quantum_boost_factors = scoring_config.get('quantum_priority_boosts', {
-                    'quantum_performance_optimization': 1.5,
-                    'quantum_security_improvements': 1.4,
-                    'quantum_backend_modernization': 1.3,
-                    'hybrid_algorithm_optimization': 1.2,
-                    'quantum_cost_optimization': 1.2
-                })
-                
-                logger.info(f"Configuration loaded from {self.config_path}")
-            else:
-                logger.warning(f"Configuration file {self.config_path} not found, using defaults")
+        self.config = self._load_config()
         
-        except Exception as e:
-            logger.error(f"Failed to load configuration: {e}")
+        # Extract configuration components
+        scoring_config = self.config.get('scoring', {})
+        self.weights = ScoringWeights(**scoring_config.get('weights', {}))
+        self.thresholds = ScoringThresholds(**scoring_config.get('thresholds', {}))
+        self.quantum_boosts = QuantumDomainBoosts(
+            **scoring_config.get('quantum_domain_boosts', {})
+        )
+        
+        # Learning configuration
+        learning_config = scoring_config.get('learning', {})
+        self.learning_enabled = learning_config.get('enabled', True)
+        self.learning_rate = learning_config.get('learning_rate', 0.1)
+        self.confidence_decay = learning_config.get('confidence_decay', 0.95)
+        
+        # Historical data for learning
+        self.prediction_history: List[Dict] = []
+        self.outcome_history: List[Dict] = []
+        
+        logger.info(f"Initialized AdvancedScoringModel with weights: {self.weights}")
     
-    def calculate_wsjf_score(self, task: TaskMetrics) -> float:
+    def _load_config(self) -> Dict:
+        """Load configuration from YAML file."""
+        try:
+            config_path = Path(self.config_path)
+            if config_path.exists():
+                with open(config_path, 'r') as f:
+                    return yaml.safe_load(f)
+            else:
+                logger.warning(f"Config file not found: {config_path}")
+                return {}
+        except Exception as e:
+            logger.error(f"Error loading config: {e}")
+            return {}
+    
+    def calculate_wsjf_score(self, task: TaskItem) -> float:
         """
         Calculate Weighted Shortest Job First (WSJF) score.
         
-        WSJF = (Business Value + Time Criticality + Risk Reduction) / Job Size
-        Higher scores indicate higher priority.
+        WSJF = Cost of Delay / Job Size
+        Cost of Delay = User/Business Value + Time Criticality + Risk Reduction + Opportunity Enablement
         """
-        numerator = (
-            task.user_business_value * self.weights.wsjf_user_value +
-            task.time_criticality * self.weights.wsjf_time_criticality +
-            task.risk_reduction * self.weights.wsjf_risk_reduction
+        cost_of_delay = (
+            task.user_business_value + 
+            task.time_criticality + 
+            task.risk_reduction + 
+            task.opportunity_enablement
         )
         
-        # Avoid division by zero, minimum job size of 0.1
-        denominator = max(task.job_size * self.weights.wsjf_job_size, 0.1)
+        # Avoid division by zero
+        job_size = max(task.job_size_estimate, 0.1)
         
-        wsjf_score = numerator / denominator
+        wsjf_score = cost_of_delay / job_size
         
-        # Normalize to 0-10 scale
-        normalized_score = min(10.0, max(0.0, wsjf_score))
-        
-        logger.debug(f"WSJF score for {task.task_id}: {normalized_score:.2f}")
-        return normalized_score
+        # Apply domain-specific multipliers
+        if task.category == TaskCategory.QUANTUM_SECURITY:
+            wsjf_score *= self.thresholds.security_multiplier
+        elif task.category == TaskCategory.PERFORMANCE_OPTIMIZATION:
+            wsjf_score *= self.thresholds.performance_multiplier
+            
+        return round(wsjf_score, 2)
     
-    def calculate_ice_score(self, task: TaskMetrics) -> float:
+    def calculate_ice_score(self, task: TaskItem) -> float:
         """
         Calculate ICE (Impact, Confidence, Ease) score.
         
-        ICE = Impact * Confidence * Ease / 1000 * 10 (normalized)
-        Higher scores indicate better strategic value.
+        ICE = Impact × Confidence × Ease
         """
-        ice_raw = (
-            task.impact * self.weights.ice_impact +
-            task.confidence * self.weights.ice_confidence +
-            task.ease * self.weights.ice_ease
-        )
+        ice_score = task.impact * task.confidence * task.ease
         
-        # Normalize to 0-10 scale
-        ice_score = min(10.0, max(0.0, ice_raw))
+        # Normalize to similar scale as WSJF (typically 0-100)
+        ice_score = (ice_score / 1000) * 100
         
-        logger.debug(f"ICE score for {task.task_id}: {ice_score:.2f}")
-        return ice_score
+        return round(ice_score, 2)
     
-    def calculate_technical_debt_score(self, task: TaskMetrics) -> float:
+    def calculate_technical_debt_score(self, task: TaskItem) -> float:
         """
-        Calculate Technical Debt severity score.
+        Calculate Technical Debt score.
         
-        Weighted combination of various technical debt factors.
-        Higher scores indicate more urgent technical debt.
+        Debt Score = (Debt Impact + Debt Interest) × Hotspot Multiplier
         """
-        td_score = (
-            task.code_complexity * self.weights.td_complexity +
-            task.security_vulnerability * self.weights.td_security +
-            task.performance_impact * self.weights.td_performance +
-            task.maintainability_impact * self.weights.td_maintainability +
-            task.test_coverage_gap * self.weights.td_test_coverage
-        )
+        debt_base = task.debt_impact + task.debt_interest
+        debt_score = debt_base * task.hotspot_multiplier
         
-        # Normalize to 0-10 scale
-        normalized_score = min(10.0, max(0.0, td_score))
+        # Apply category-specific adjustments
+        if task.category == TaskCategory.TECHNICAL_DEBT:
+            debt_score *= 1.2  # Boost actual technical debt tasks
         
-        logger.debug(f"Technical debt score for {task.task_id}: {normalized_score:.2f}")
-        return normalized_score
+        return round(debt_score, 2)
     
-    def calculate_quantum_boost(self, task: TaskMetrics) -> float:
+    def calculate_quantum_boost(self, task: TaskItem) -> float:
         """
-        Calculate quantum computing domain-specific boost factor.
+        Calculate quantum computing domain-specific boost.
         
-        Applies domain expertise to prioritize quantum-specific improvements.
+        Applies domain expertise and quantum-specific prioritization.
         """
-        if not task.quantum_domain:
-            return 1.0  # No boost for non-quantum tasks
+        if not task.quantum_domain or task.quantum_relevance == 0:
+            return 0.0
         
-        # Base quantum boost
-        base_boost = 1.0
-        
-        # Domain-specific boosts
-        domain_boosts = {
-            QuantumDomain.QUBO_OPTIMIZATION: 1.5,
-            QuantumDomain.QUANTUM_BACKENDS: 1.4,
-            QuantumDomain.HYBRID_ALGORITHMS: 1.3,
-            QuantumDomain.PERFORMANCE_TUNING: 1.4,
-            QuantumDomain.QUANTUM_SECURITY: 1.6,
-            QuantumDomain.CLASSICAL_FALLBACKS: 1.2,
-            QuantumDomain.RESEARCH_INTEGRATION: 1.1
+        # Get domain-specific boost factor
+        domain_boost_map = {
+            QuantumDomainType.QUBO_OPTIMIZATION: self.quantum_boosts.qubo_optimization,
+            QuantumDomainType.QUANTUM_BACKEND: self.quantum_boosts.quantum_backend,
+            QuantumDomainType.HYBRID_ALGORITHMS: self.quantum_boosts.hybrid_algorithms,
+            QuantumDomainType.QUANTUM_SECURITY: self.quantum_boosts.quantum_security,
+            QuantumDomainType.ERROR_MITIGATION: self.quantum_boosts.error_mitigation,
+            QuantumDomainType.QUANTUM_ML: self.quantum_boosts.quantum_machine_learning,
+            QuantumDomainType.QUANTUM_NETWORKING: self.quantum_boosts.quantum_networking,
         }
         
-        domain_boost = domain_boosts.get(task.quantum_domain, 1.0)
+        domain_boost = domain_boost_map.get(task.quantum_domain, 1.0)
         
-        # Performance impact boost
-        performance_boost = 1.0 + (task.quantum_performance_impact / 10.0) * 0.3
+        # Calculate quantum boost score
+        quantum_boost = (
+            task.quantum_relevance * 
+            domain_boost * 
+            self.thresholds.quantum_multiplier * 
+            10  # Scale to match other components
+        )
         
-        # Cost optimization boost
-        cost_boost = 1.0 + (task.quantum_cost_impact / 10.0) * 0.2
-        
-        # Research value boost
-        research_boost = 1.0 + (task.quantum_research_value / 10.0) * 0.15
-        
-        total_boost = base_boost * domain_boost * performance_boost * cost_boost * research_boost
-        
-        # Cap maximum boost at 3.0x
-        total_boost = min(3.0, total_boost)
-        
-        logger.debug(f"Quantum boost for {task.task_id}: {total_boost:.2f}x")
-        return total_boost
+        return round(quantum_boost, 2)
     
-    def calculate_urgency_multiplier(self, task: TaskMetrics) -> float:
-        """Calculate urgency-based score multiplier."""
-        urgency_multipliers = {
-            UrgencyLevel.CRITICAL: 2.0,
-            UrgencyLevel.HIGH: 1.5,
-            UrgencyLevel.MEDIUM: 1.0,
-            UrgencyLevel.LOW: 0.7
+    def calculate_risk_score(self, task: TaskItem) -> float:
+        """Calculate overall risk score for the task."""
+        risk_factors = {
+            'complexity': min(task.job_size_estimate / 10, 1.0),
+            'dependencies': min(len(task.dependencies) / 5, 1.0),
+            'confidence': 1.0 - (task.confidence / 10),
+            'technical_uncertainty': 1.0 - (task.ease / 10)
         }
         
-        return urgency_multipliers.get(task.urgency, 1.0)
+        # Add quantum-specific risks
+        if task.quantum_domain:
+            risk_factors['quantum_uncertainty'] = 0.3  # Quantum computing inherent risk
+        
+        # Weight and combine risk factors
+        total_risk = sum(risk_factors.values()) / len(risk_factors)
+        
+        # Apply risk factor penalties
+        for factor in task.risk_factors:
+            if 'security' in factor.lower():
+                total_risk += 0.2
+            elif 'performance' in factor.lower():
+                total_risk += 0.1
+            elif 'breaking' in factor.lower():
+                total_risk += 0.3
+        
+        return min(total_risk, 1.0)
     
-    def calculate_category_multiplier(self, task: TaskMetrics) -> float:
-        """Calculate category-based score multiplier."""
+    def calculate_composite_score(self, task: TaskItem) -> float:
+        """
+        Calculate the final composite score using all components.
+        
+        Composite Score = (WSJF × w1) + (ICE × w2) + (TechDebt × w3) + (QuantumBoost × w4)
+        """
+        # Calculate individual component scores
+        task.wsjf_score = self.calculate_wsjf_score(task)
+        task.ice_score = self.calculate_ice_score(task)
+        task.tech_debt_score = self.calculate_technical_debt_score(task)
+        task.quantum_boost = self.calculate_quantum_boost(task)
+        task.risk_score = self.calculate_risk_score(task)
+        
+        # Normalize scores to similar ranges for fair weighting
+        normalized_wsjf = min(task.wsjf_score / 50, 1.0) * 100  # Normalize WSJF
+        normalized_ice = task.ice_score  # ICE already scaled appropriately
+        normalized_debt = min(task.tech_debt_score / 100, 1.0) * 100
+        normalized_quantum = task.quantum_boost * 10  # Scale quantum boost
+        
+        # Calculate weighted composite score
+        composite_score = (
+            (normalized_wsjf * self.weights.wsjf) +
+            (normalized_ice * self.weights.ice) +
+            (normalized_debt * self.weights.technical_debt) +
+            (normalized_quantum * self.weights.quantum_boost)
+        )
+        
+        # Apply risk adjustment (reduce score based on risk)
+        risk_penalty = task.risk_score * 0.3  # Up to 30% penalty for high risk
+        composite_score *= (1.0 - risk_penalty)
+        
+        # Apply category-specific final adjustments
         category_multipliers = {
-            TaskCategory.SECURITY: 1.8,
-            TaskCategory.PERFORMANCE: 1.4,
-            TaskCategory.QUANTUM_OPTIMIZATION: 1.6,
-            TaskCategory.TECHNICAL_DEBT: 1.2,
-            TaskCategory.INNOVATION: 1.1,
-            TaskCategory.MAINTENANCE: 1.0,
-            TaskCategory.INTEGRATION: 1.3,
-            TaskCategory.RESEARCH: 1.1
+            TaskCategory.QUANTUM_SECURITY: 1.2,
+            TaskCategory.QUANTUM_OPTIMIZATION: 1.1,
+            TaskCategory.PERFORMANCE_OPTIMIZATION: 1.05,
+            TaskCategory.TECHNICAL_DEBT: 0.9,
+            TaskCategory.DOCUMENTATION: 0.8
         }
         
-        return category_multipliers.get(task.category, 1.0)
+        multiplier = category_multipliers.get(task.category, 1.0)
+        composite_score *= multiplier
+        
+        task.composite_score = round(composite_score, 2)
+        return task.composite_score
     
-    def calculate_composite_score(self, task: TaskMetrics) -> Dict[str, float]:
-        """
-        Calculate the composite priority score using hybrid model.
+    def score_task(self, task: TaskItem) -> TaskItem:
+        """Score a single task and return the updated task with scores."""
+        self.calculate_composite_score(task)
         
-        Returns detailed scoring breakdown for transparency and debugging.
-        """
-        # Calculate component scores
-        wsjf_score = self.calculate_wsjf_score(task)
-        ice_score = self.calculate_ice_score(task)
-        td_score = self.calculate_technical_debt_score(task)
-        quantum_boost = self.calculate_quantum_boost(task)
+        # Determine auto-executability and approval requirements
+        self._assess_execution_requirements(task)
         
-        # Calculate multipliers
-        urgency_multiplier = self.calculate_urgency_multiplier(task)
-        category_multiplier = self.calculate_category_multiplier(task)
+        # Store prediction for learning
+        if self.learning_enabled:
+            self._store_prediction(task)
         
-        # Weighted combination of base scores
-        base_score = (
-            wsjf_score * self.weights.wsjf +
-            ice_score * self.weights.ice +
-            td_score * self.weights.technical_debt
-        )
-        
-        # Apply quantum boost
-        quantum_boosted_score = base_score * quantum_boost * self.weights.quantum_boost + base_score * (1 - self.weights.quantum_boost)
-        
-        # Apply multipliers
-        final_score = quantum_boosted_score * urgency_multiplier * category_multiplier
-        
-        # Cap final score at 100
-        final_score = min(100.0, max(0.0, final_score))
-        
-        return {
-            'final_score': final_score,
-            'base_score': base_score,
-            'wsjf_score': wsjf_score,
-            'ice_score': ice_score,
-            'technical_debt_score': td_score,
-            'quantum_boost': quantum_boost,
-            'urgency_multiplier': urgency_multiplier,
-            'category_multiplier': category_multiplier,
-            'confidence': task.confidence_score
-        }
+        logger.info(f"Scored task '{task.title}': {task.composite_score}")
+        return task
     
-    def prioritize_tasks(self, tasks: List[TaskMetrics]) -> List[Tuple[TaskMetrics, Dict[str, float]]]:
-        """
-        Prioritize a list of tasks using the hybrid scoring model.
+    def score_tasks(self, tasks: List[TaskItem]) -> List[TaskItem]:
+        """Score multiple tasks and return sorted by composite score."""
+        scored_tasks = [self.score_task(task) for task in tasks]
         
-        Returns tasks sorted by priority (highest first) with scoring details.
-        """
-        scored_tasks = []
+        # Sort by composite score (descending)
+        scored_tasks.sort(key=lambda t: t.composite_score, reverse=True)
         
-        for task in tasks:
-            scores = self.calculate_composite_score(task)
-            scored_tasks.append((task, scores))
-        
-        # Sort by final score (descending)
-        scored_tasks.sort(key=lambda x: x[1]['final_score'], reverse=True)
-        
-        logger.info(f"Prioritized {len(tasks)} tasks")
         return scored_tasks
     
-    def generate_priority_explanation(self, task: TaskMetrics, scores: Dict[str, float]) -> str:
-        """Generate human-readable explanation for task priority."""
-        explanation_parts = []
+    def _assess_execution_requirements(self, task: TaskItem):
+        """Assess whether task can be auto-executed and what approvals are needed."""
+        # Auto-execution assessment
+        auto_exec_factors = {
+            'low_risk': task.risk_score < 0.3,
+            'high_confidence': task.confidence >= 7.0,
+            'simple_task': task.job_size_estimate <= 3.0,
+            'no_security_risk': 'security' not in [r.lower() for r in task.risk_factors]
+        }
         
-        # Priority level
-        final_score = scores['final_score']
-        if final_score >= 80:
-            priority_level = "CRITICAL"
-        elif final_score >= 60:
-            priority_level = "HIGH"
-        elif final_score >= 40:
-            priority_level = "MEDIUM"
-        else:
-            priority_level = "LOW"
+        task.auto_executable = sum(auto_exec_factors.values()) >= 3
         
-        explanation_parts.append(f"Priority: {priority_level} (Score: {final_score:.1f})")
+        # Approval requirements
+        approvals = []
         
-        # Key factors
-        if scores['quantum_boost'] > 1.2:
-            explanation_parts.append(f"✨ Quantum optimization opportunity (+{(scores['quantum_boost']-1)*100:.0f}% boost)")
+        if task.category == TaskCategory.QUANTUM_SECURITY:
+            approvals.extend(["security-team", "quantum-expert"])
+        elif task.category == TaskCategory.QUANTUM_OPTIMIZATION:
+            approvals.append("quantum-expert")
+        elif task.category == TaskCategory.BACKEND_INTEGRATION:
+            approvals.extend(["tech-lead", "quantum-expert"])
+        elif task.risk_score > 0.7:
+            approvals.append("tech-lead")
         
-        if task.urgency == UrgencyLevel.CRITICAL:
-            explanation_parts.append("🚨 Critical urgency")
+        if task.job_size_estimate > 8:  # Large tasks
+            approvals.append("project-manager")
         
-        if task.category == TaskCategory.SECURITY:
-            explanation_parts.append("🔒 Security improvement")
-        
-        if scores['technical_debt_score'] > 7:
-            explanation_parts.append("⚠️ High technical debt impact")
-        
-        if scores['wsjf_score'] > 8:
-            explanation_parts.append("📈 High business value/effort ratio")
-        
-        # Quantum-specific insights
-        if task.quantum_domain:
-            domain_name = task.quantum_domain.value.replace('_', ' ').title()
-            explanation_parts.append(f"🔬 {domain_name} enhancement")
-        
-        return " | ".join(explanation_parts)
+        task.approval_required = list(set(approvals))  # Remove duplicates
     
-    def adaptive_learning_update(self, task_id: str, actual_outcome: Dict[str, Any]) -> None:
-        """
-        Update the model based on actual task execution outcomes.
-        
-        Implements reinforcement learning to improve future predictions.
-        """
-        outcome_record = {
-            'task_id': task_id,
+    def _store_prediction(self, task: TaskItem):
+        """Store prediction data for learning."""
+        prediction = {
+            'task_id': task.id,
+            'predicted_composite_score': task.composite_score,
+            'predicted_effort': task.estimated_effort_hours,
+            'predicted_impact': task.impact,
             'timestamp': datetime.now().isoformat(),
-            'outcome': actual_outcome,
-            'predicted_score': actual_outcome.get('predicted_score', 0),
-            'actual_value': actual_outcome.get('actual_value', 0),
-            'completion_time': actual_outcome.get('completion_time', 0),
-            'success': actual_outcome.get('success', False)
+            'model_version': '2.1.0'
         }
-        
-        self.historical_outcomes.append(outcome_record)
-        
-        # Simple learning: adjust weights based on prediction accuracy
-        if len(self.historical_outcomes) >= 10:
-            self._update_weights_from_outcomes()
-        
-        logger.info(f"Recorded outcome for task {task_id}")
+        self.prediction_history.append(prediction)
     
-    def _update_weights_from_outcomes(self) -> None:
-        """Update model weights based on historical outcomes."""
-        recent_outcomes = self.historical_outcomes[-20:]  # Use last 20 outcomes
+    def update_from_outcome(self, task_id: str, actual_effort: float, 
+                          actual_impact: float, outcome_quality: float):
+        """Update model based on actual execution outcomes."""
+        if not self.learning_enabled:
+            return
         
+        outcome = {
+            'task_id': task_id,
+            'actual_effort': actual_effort,
+            'actual_impact': actual_impact,
+            'outcome_quality': outcome_quality,  # 0-1 scale
+            'timestamp': datetime.now().isoformat()
+        }
+        self.outcome_history.append(outcome)
+        
+        # Find corresponding prediction
+        prediction = next(
+            (p for p in self.prediction_history if p['task_id'] == task_id),
+            None
+        )
+        
+        if prediction:
+            self._adjust_model_weights(prediction, outcome)
+    
+    def _adjust_model_weights(self, prediction: Dict, outcome: Dict):
+        """Adjust model weights based on prediction accuracy."""
         # Calculate prediction accuracy
-        accuracy_sum = 0
-        for outcome in recent_outcomes:
-            predicted = outcome['predicted_score']
-            actual = outcome['actual_value']
-            if predicted > 0:  # Avoid division by zero
-                accuracy = 1 - abs(predicted - actual) / max(predicted, actual)
-                accuracy_sum += accuracy
+        effort_accuracy = 1.0 - abs(
+            prediction['predicted_effort'] - outcome['actual_effort']
+        ) / max(prediction['predicted_effort'], 1.0)
         
-        avg_accuracy = accuracy_sum / len(recent_outcomes) if recent_outcomes else 0.5
+        impact_accuracy = 1.0 - abs(
+            prediction['predicted_impact'] - outcome['actual_impact']
+        ) / max(prediction['predicted_impact'], 1.0)
         
-        # Adjust learning rate based on accuracy
-        if avg_accuracy < 0.7:  # Low accuracy, learn faster
-            adjustment_factor = self.learning_rate * 1.5
-        else:  # Good accuracy, learn slower
-            adjustment_factor = self.learning_rate * 0.5
+        overall_accuracy = (effort_accuracy + impact_accuracy) / 2.0
         
-        logger.info(f"Model learning update: accuracy={avg_accuracy:.3f}, adjustment={adjustment_factor:.3f}")
+        # Adjust weights based on accuracy and outcome quality
+        if overall_accuracy < 0.7:  # Poor prediction
+            # Reduce confidence in current weighting
+            adjustment = self.learning_rate * (0.7 - overall_accuracy)
+            
+            # Simple weight adjustment logic (could be more sophisticated)
+            if outcome['outcome_quality'] > 0.8:  # Good outcome despite poor prediction
+                # Increase weight of components that predicted high value
+                if prediction['predicted_composite_score'] > 50:
+                    # This was a beneficial task we didn't predict well
+                    pass  # More complex logic would go here
+        
+        logger.info(f"Model learning: accuracy={overall_accuracy:.2f}, quality={outcome['outcome_quality']:.2f}")
+
+class QuantumTaskDiscovery:
+    """
+    Advanced task discovery system for quantum computing repositories.
     
-    def export_model_state(self) -> Dict[str, Any]:
-        """Export current model state for persistence."""
-        return {
-            'weights': {
-                'wsjf': self.weights.wsjf,
-                'ice': self.weights.ice,
-                'technical_debt': self.weights.technical_debt,
-                'quantum_boost': self.weights.quantum_boost
-            },
-            'quantum_boost_factors': self.quantum_boost_factors,
-            'learning_rate': self.learning_rate,
-            'historical_outcomes_count': len(self.historical_outcomes),
-            'export_timestamp': datetime.now().isoformat()
-        }
+    Discovers optimization opportunities through multiple signal sources:
+    - Git history analysis
+    - Static code analysis  
+    - Issue tracker mining
+    - Performance monitoring
+    - Research integration
+    """
     
-    def generate_scoring_report(self, tasks: List[TaskMetrics]) -> Dict[str, Any]:
-        """Generate comprehensive scoring analysis report."""
-        if not tasks:
-            return {'error': 'No tasks provided for analysis'}
+    def __init__(self, repo_path: str = ".", config_path: str = ".terragon/config.yaml"):
+        self.repo_path = Path(repo_path)
+        self.config_path = config_path
+        self.config = self._load_config()
+        self.scorer = AdvancedScoringModel(config_path)
         
-        prioritized_tasks = self.prioritize_tasks(tasks)
+        # Discovery sources configuration
+        discovery_config = self.config.get('discovery', {}).get('sources', {})
+        self.git_enabled = discovery_config.get('git_history', {}).get('enabled', True)
+        self.static_analysis_enabled = discovery_config.get('static_analysis', {}).get('enabled', True)
+        self.issues_enabled = discovery_config.get('issue_trackers', {}).get('enabled', True)
         
-        # Summary statistics
-        scores = [scores['final_score'] for _, scores in prioritized_tasks]
+    def _load_config(self) -> Dict:
+        """Load discovery configuration."""
+        try:
+            with open(self.config_path, 'r') as f:
+                return yaml.safe_load(f)
+        except Exception as e:
+            logger.error(f"Error loading config: {e}")
+            return {}
+    
+    def discover_tasks(self) -> List[TaskItem]:
+        """Run comprehensive task discovery across all enabled sources."""
+        discovered_tasks = []
         
-        report = {
-            'summary': {
-                'total_tasks': len(tasks),
-                'high_priority_tasks': len([s for s in scores if s >= 60]),
-                'medium_priority_tasks': len([s for s in scores if 40 <= s < 60]),
-                'low_priority_tasks': len([s for s in scores if s < 40]),
-                'average_score': sum(scores) / len(scores),
-                'max_score': max(scores),
-                'min_score': min(scores)
+        if self.git_enabled:
+            discovered_tasks.extend(self._discover_from_git_history())
+        
+        if self.static_analysis_enabled:
+            discovered_tasks.extend(self._discover_from_static_analysis())
+        
+        if self.issues_enabled:
+            discovered_tasks.extend(self._discover_from_issues())
+        
+        # Add quantum-specific discoveries
+        discovered_tasks.extend(self._discover_quantum_opportunities())
+        
+        # Remove duplicates and score tasks
+        unique_tasks = self._deduplicate_tasks(discovered_tasks)
+        scored_tasks = self.scorer.score_tasks(unique_tasks)
+        
+        logger.info(f"Discovered {len(scored_tasks)} unique tasks")
+        return scored_tasks
+    
+    def _discover_from_git_history(self) -> List[TaskItem]:
+        """Discover tasks from git commit history and code comments."""
+        tasks = []
+        
+        # Common patterns that indicate technical debt or improvement opportunities
+        patterns = [
+            (r'TODO|FIXME|HACK|XXX', TaskCategory.TECHNICAL_DEBT),
+            (r'QUANTUM_TODO|QUBO_OPTIMIZE', TaskCategory.QUANTUM_OPTIMIZATION),
+            (r'PERFORMANCE_ISSUE|OPTIMIZE', TaskCategory.PERFORMANCE_OPTIMIZATION),
+            (r'SECURITY_REVIEW|VULNERABILITY', TaskCategory.QUANTUM_SECURITY),
+        ]
+        
+        # Simulated git history analysis (in real implementation, would use GitPython)
+        sample_findings = [
+            {
+                'text': 'TODO: Optimize QUBO matrix construction for large problems',
+                'file': 'src/quantum_planner/optimizer.py',
+                'category': TaskCategory.QUANTUM_OPTIMIZATION,
+                'quantum_domain': QuantumDomainType.QUBO_OPTIMIZATION,
+                'quantum_relevance': 0.9
             },
-            'category_breakdown': {},
-            'quantum_analysis': {},
-            'top_priorities': [],
-            'recommendations': [],
-            'model_info': self.export_model_state()
-        }
-        
-        # Category breakdown
-        category_counts = {}
-        category_scores = {}
-        for task, task_scores in prioritized_tasks:
-            cat = task.category.value
-            category_counts[cat] = category_counts.get(cat, 0) + 1
-            if cat not in category_scores:
-                category_scores[cat] = []
-            category_scores[cat].append(task_scores['final_score'])
-        
-        for cat, count in category_counts.items():
-            report['category_breakdown'][cat] = {
-                'count': count,
-                'average_score': sum(category_scores[cat]) / len(category_scores[cat]),
-                'percentage': (count / len(tasks)) * 100
+            {
+                'text': 'FIXME: Quantum backend authentication is insecure',
+                'file': 'src/quantum_planner/backends.py', 
+                'category': TaskCategory.QUANTUM_SECURITY,
+                'quantum_domain': QuantumDomainType.QUANTUM_SECURITY,
+                'quantum_relevance': 1.0
+            },
+            {
+                'text': 'PERFORMANCE_ISSUE: Classical fallback is too slow',
+                'file': 'src/quantum_planner/classical.py',
+                'category': TaskCategory.PERFORMANCE_OPTIMIZATION,
+                'quantum_domain': QuantumDomainType.HYBRID_ALGORITHMS,
+                'quantum_relevance': 0.7
             }
+        ]
         
-        # Quantum analysis
-        quantum_tasks = [task for task, _ in prioritized_tasks if task.quantum_domain]
-        report['quantum_analysis'] = {
-            'quantum_tasks_count': len(quantum_tasks),
-            'quantum_percentage': (len(quantum_tasks) / len(tasks)) * 100,
-            'average_quantum_boost': sum([scores['quantum_boost'] for _, scores in prioritized_tasks if _.quantum_domain]) / max(len(quantum_tasks), 1)
+        for finding in sample_findings:
+            task = TaskItem(
+                id=self._generate_task_id(finding['text']),
+                title=finding['text'].replace('TODO:', '').replace('FIXME:', '').strip(),
+                description=f"Address technical debt in {finding['file']}",
+                category=finding['category'],
+                source='git_history',
+                file_paths=[finding['file']],
+                quantum_domain=finding.get('quantum_domain'),
+                quantum_relevance=finding.get('quantum_relevance', 0.0),
+                # Set reasonable defaults for scoring
+                user_business_value=6.0,
+                time_criticality=5.0,
+                risk_reduction=7.0,
+                opportunity_enablement=5.0,
+                job_size_estimate=3.0,
+                impact=7.0,
+                confidence=8.0,
+                ease=6.0,
+                debt_impact=8.0,
+                debt_interest=4.0,
+                hotspot_multiplier=2.0
+            )
+            tasks.append(task)
+        
+        return tasks
+    
+    def _discover_from_static_analysis(self) -> List[TaskItem]:
+        """Discover tasks from static code analysis."""
+        tasks = []
+        
+        # Simulated static analysis findings
+        findings = [
+            {
+                'title': 'Add comprehensive error handling for quantum operations',
+                'description': 'Quantum operations lack proper error handling and fallback mechanisms',
+                'category': TaskCategory.QUANTUM_OPTIMIZATION,
+                'severity': 'high',
+                'quantum_domain': QuantumDomainType.ERROR_MITIGATION,
+                'files': ['src/quantum_planner/optimizer.py', 'src/quantum_planner/backends.py']
+            },
+            {
+                'title': 'Optimize memory usage in QUBO matrix operations',
+                'description': 'Large QUBO matrices causing excessive memory consumption',
+                'category': TaskCategory.PERFORMANCE_OPTIMIZATION,
+                'severity': 'medium',
+                'quantum_domain': QuantumDomainType.QUBO_OPTIMIZATION,
+                'files': ['src/quantum_planner/formulation.py']
+            },
+            {
+                'title': 'Implement secure quantum credential storage',
+                'description': 'Quantum backend credentials stored in plaintext',
+                'category': TaskCategory.QUANTUM_SECURITY,
+                'severity': 'critical',
+                'quantum_domain': QuantumDomainType.QUANTUM_SECURITY,
+                'files': ['src/quantum_planner/backends.py']
+            }
+        ]
+        
+        for finding in findings:
+            # Map severity to scoring values
+            severity_map = {
+                'critical': {'business_value': 10, 'time_criticality': 9, 'impact': 10},
+                'high': {'business_value': 8, 'time_criticality': 7, 'impact': 8},
+                'medium': {'business_value': 6, 'time_criticality': 5, 'impact': 6},
+                'low': {'business_value': 4, 'time_criticality': 3, 'impact': 4}
+            }
+            
+            severity_scores = severity_map.get(finding['severity'], severity_map['medium'])
+            
+            task = TaskItem(
+                id=self._generate_task_id(finding['title']),
+                title=finding['title'],
+                description=finding['description'],
+                category=finding['category'],
+                source='static_analysis',
+                file_paths=finding['files'],
+                quantum_domain=finding.get('quantum_domain'),
+                quantum_relevance=0.8 if finding.get('quantum_domain') else 0.2,
+                user_business_value=severity_scores['business_value'],
+                time_criticality=severity_scores['time_criticality'],
+                risk_reduction=8.0,
+                opportunity_enablement=6.0,
+                job_size_estimate=4.0,
+                impact=severity_scores['impact'],
+                confidence=7.0,
+                ease=5.0,
+                debt_impact=10.0,
+                debt_interest=6.0,
+                hotspot_multiplier=1.5
+            )
+            
+            tasks.append(task)
+        
+        return tasks
+    
+    def _discover_from_issues(self) -> List[TaskItem]:
+        """Discover tasks from issue tracker (GitHub Issues, etc.)."""
+        tasks = []
+        
+        # Simulated issue tracker findings  
+        issues = [
+            {
+                'title': 'Add support for QAOA algorithm',
+                'description': 'Implement Quantum Approximate Optimization Algorithm for better performance',
+                'labels': ['enhancement', 'quantum', 'research'],
+                'priority': 'high',
+                'quantum_domain': QuantumDomainType.HYBRID_ALGORITHMS
+            },
+            {
+                'title': 'Performance regression in large problem solving',
+                'description': 'Recent changes caused 30% performance decrease for problems >50 variables',
+                'labels': ['bug', 'performance', 'critical'],
+                'priority': 'critical',
+                'quantum_domain': QuantumDomainType.QUBO_OPTIMIZATION
+            }
+        ]
+        
+        for issue in issues:
+            priority_map = {
+                'critical': 10,
+                'high': 8,
+                'medium': 6,
+                'low': 4
+            }
+            
+            priority_score = priority_map.get(issue['priority'], 6)
+            
+            # Determine category from labels
+            category = TaskCategory.TECHNICAL_DEBT  # Default
+            if 'quantum' in issue['labels']:
+                category = TaskCategory.QUANTUM_OPTIMIZATION
+            elif 'performance' in issue['labels']:
+                category = TaskCategory.PERFORMANCE_OPTIMIZATION
+            elif 'security' in issue['labels']:
+                category = TaskCategory.QUANTUM_SECURITY
+            elif 'research' in issue['labels']:
+                category = TaskCategory.RESEARCH_INTEGRATION
+            
+            task = TaskItem(
+                id=self._generate_task_id(issue['title']),
+                title=issue['title'],
+                description=issue['description'],
+                category=category,
+                source='issue_tracker',
+                quantum_domain=issue.get('quantum_domain'),
+                quantum_relevance=0.9 if issue.get('quantum_domain') else 0.3,
+                user_business_value=priority_score,
+                time_criticality=priority_score,
+                risk_reduction=5.0,
+                opportunity_enablement=7.0,
+                job_size_estimate=6.0,
+                impact=priority_score,
+                confidence=6.0,
+                ease=4.0,
+                debt_impact=5.0,
+                debt_interest=3.0,
+                hotspot_multiplier=1.2
+            )
+            
+            tasks.append(task)
+        
+        return tasks
+    
+    def _discover_quantum_opportunities(self) -> List[TaskItem]:
+        """Discover quantum computing specific optimization opportunities."""
+        tasks = []
+        
+        # Quantum-specific opportunities based on repository analysis
+        opportunities = [
+            {
+                'title': 'Implement hybrid quantum-classical optimization pipeline',
+                'description': 'Create seamless integration between quantum and classical solvers',
+                'category': TaskCategory.HYBRID_ALGORITHMS,
+                'quantum_domain': QuantumDomainType.HYBRID_ALGORITHMS,
+                'business_value': 9,
+                'effort': 8
+            },
+            {
+                'title': 'Add quantum circuit depth optimization',
+                'description': 'Optimize quantum circuits for NISQ devices with limited coherence',
+                'category': TaskCategory.QUANTUM_OPTIMIZATION,
+                'quantum_domain': QuantumDomainType.ERROR_MITIGATION,
+                'business_value': 7,
+                'effort': 6
+            },
+            {
+                'title': 'Implement quantum machine learning integration',
+                'description': 'Add QML capabilities for task classification and optimization',
+                'category': TaskCategory.RESEARCH_INTEGRATION,
+                'quantum_domain': QuantumDomainType.QUANTUM_ML,
+                'business_value': 6,
+                'effort': 10
+            }
+        ]
+        
+        for opp in opportunities:
+            task = TaskItem(
+                id=self._generate_task_id(opp['title']),
+                title=opp['title'],
+                description=opp['description'],
+                category=opp['category'],
+                source='quantum_analysis',
+                quantum_domain=opp['quantum_domain'],
+                quantum_relevance=1.0,
+                user_business_value=opp['business_value'],
+                time_criticality=5.0,
+                risk_reduction=4.0,
+                opportunity_enablement=9.0,
+                job_size_estimate=opp['effort'],
+                impact=opp['business_value'],
+                confidence=5.0,  # Research has inherent uncertainty
+                ease=3.0,        # Quantum development is challenging
+                debt_impact=2.0,
+                debt_interest=1.0,
+                hotspot_multiplier=1.1
+            )
+            
+            tasks.append(task)
+        
+        return tasks
+    
+    def _deduplicate_tasks(self, tasks: List[TaskItem]) -> List[TaskItem]:
+        """Remove duplicate tasks based on similarity."""
+        unique_tasks = []
+        seen_hashes = set()
+        
+        for task in tasks:
+            # Create a hash based on title and description similarity
+            content = f"{task.title.lower()} {task.description.lower()}"
+            content_hash = hashlib.md5(content.encode()).hexdigest()[:8]
+            
+            if content_hash not in seen_hashes:
+                unique_tasks.append(task)
+                seen_hashes.add(content_hash)
+        
+        return unique_tasks
+    
+    def _generate_task_id(self, title: str) -> str:
+        """Generate a unique task ID from title."""
+        # Create ID from title hash + timestamp
+        title_hash = hashlib.md5(title.encode()).hexdigest()[:8]
+        timestamp = datetime.now().strftime("%Y%m%d%H%M")
+        return f"task_{title_hash}_{timestamp}"
+
+class ValueMetricsTracker:
+    """
+    Advanced value metrics tracking and reporting system.
+    
+    Tracks execution outcomes, ROI, and continuous learning metrics
+    for the autonomous SDLC system.
+    """
+    
+    def __init__(self, metrics_file: str = ".terragon/value-metrics.json"):
+        self.metrics_file = Path(metrics_file)
+        self.metrics_data = self._load_metrics()
+    
+    def _load_metrics(self) -> Dict:
+        """Load existing metrics data."""
+        if self.metrics_file.exists():
+            try:
+                with open(self.metrics_file, 'r') as f:
+                    return json.load(f)
+            except Exception as e:
+                logger.error(f"Error loading metrics: {e}")
+        
+        # Initialize empty metrics structure
+        return {
+            'summary': {
+                'total_tasks_discovered': 0,
+                'total_tasks_completed': 0,
+                'total_value_delivered': 0.0,
+                'total_effort_invested': 0.0,
+                'average_completion_time': 0.0,
+                'prediction_accuracy': 0.0,
+                'last_updated': datetime.now().isoformat()
+            },
+            'execution_history': [],
+            'discovery_metrics': {
+                'sources': {},
+                'categories': {},
+                'trends': []
+            },
+            'learning_metrics': {
+                'prediction_accuracy_trend': [],
+                'model_adjustments': [],
+                'outcome_correlation': {}
+            }
+        }
+    
+    def save_metrics(self):
+        """Save metrics data to file."""
+        self.metrics_data['summary']['last_updated'] = datetime.now().isoformat()
+        
+        # Ensure directory exists
+        self.metrics_file.parent.mkdir(exist_ok=True)
+        
+        try:
+            with open(self.metrics_file, 'w') as f:
+                json.dump(self.metrics_data, f, indent=2, default=str)
+        except Exception as e:
+            logger.error(f"Error saving metrics: {e}")
+    
+    def record_task_discovery(self, tasks: List[TaskItem]):
+        """Record discovered tasks in metrics."""
+        discovery_count = len(tasks)
+        self.metrics_data['summary']['total_tasks_discovered'] += discovery_count
+        
+        # Track by source
+        source_counts = defaultdict(int)
+        category_counts = defaultdict(int)
+        
+        for task in tasks:
+            source_counts[task.source] += 1
+            category_counts[task.category.value] += 1
+        
+        # Update metrics
+        discovery_metrics = self.metrics_data['discovery_metrics']
+        for source, count in source_counts.items():
+            discovery_metrics['sources'][source] = discovery_metrics['sources'].get(source, 0) + count
+        
+        for category, count in category_counts.items():
+            discovery_metrics['categories'][category] = discovery_metrics['categories'].get(category, 0) + count
+        
+        # Add trend data point
+        discovery_metrics['trends'].append({
+            'timestamp': datetime.now().isoformat(),
+            'discovered_count': discovery_count,
+            'total_score': sum(task.composite_score for task in tasks),
+            'avg_score': sum(task.composite_score for task in tasks) / len(tasks) if tasks else 0
+        })
+        
+        self.save_metrics()
+        logger.info(f"Recorded discovery of {discovery_count} tasks")
+    
+    def record_task_completion(self, task_id: str, actual_effort: float, 
+                             actual_value: float, outcome_quality: float):
+        """Record completed task execution."""
+        completion_record = {
+            'task_id': task_id,
+            'completed_at': datetime.now().isoformat(),
+            'actual_effort_hours': actual_effort,
+            'actual_value_delivered': actual_value,
+            'outcome_quality': outcome_quality,
+            'roi': actual_value / max(actual_effort, 0.1)  # Avoid division by zero
         }
         
-        # Top 10 priorities
-        for i, (task, task_scores) in enumerate(prioritized_tasks[:10]):
-            report['top_priorities'].append({
-                'rank': i + 1,
-                'task_id': task.task_id,
-                'title': task.title,
-                'category': task.category.value,
-                'score': task_scores['final_score'],
-                'explanation': self.generate_priority_explanation(task, task_scores)
+        self.metrics_data['execution_history'].append(completion_record)
+        
+        # Update summary metrics
+        summary = self.metrics_data['summary']
+        summary['total_tasks_completed'] += 1
+        summary['total_value_delivered'] += actual_value
+        summary['total_effort_invested'] += actual_effort
+        
+        # Recalculate averages
+        if summary['total_tasks_completed'] > 0:
+            summary['average_completion_time'] = (
+                summary['total_effort_invested'] / summary['total_tasks_completed']
+            )
+        
+        self.save_metrics()
+        logger.info(f"Recorded completion of task {task_id}: ROI={completion_record['roi']:.2f}")
+    
+    def calculate_roi_metrics(self) -> Dict:
+        """Calculate comprehensive ROI and value metrics."""
+        summary = self.metrics_data['summary']
+        history = self.metrics_data['execution_history']
+        
+        if not history:
+            return {'total_roi': 0.0, 'average_roi': 0.0, 'value_trend': []}
+        
+        # Calculate ROI metrics
+        total_roi = summary['total_value_delivered'] / max(summary['total_effort_invested'], 1.0)
+        
+        individual_rois = [record['roi'] for record in history]
+        average_roi = sum(individual_rois) / len(individual_rois)
+        
+        # Value trend over time
+        value_trend = []
+        cumulative_value = 0.0
+        for record in history[-10:]:  # Last 10 completions
+            cumulative_value += record['actual_value_delivered']
+            value_trend.append({
+                'timestamp': record['completed_at'],
+                'cumulative_value': cumulative_value,
+                'individual_value': record['actual_value_delivered']
             })
         
-        # Generate recommendations
-        report['recommendations'] = self._generate_recommendations(prioritized_tasks)
-        
-        return report
-    
-    def _generate_recommendations(self, prioritized_tasks: List[Tuple[TaskMetrics, Dict[str, float]]]) -> List[str]:
-        """Generate actionable recommendations based on task analysis."""
-        recommendations = []
-        
-        # High priority security tasks
-        security_tasks = [task for task, scores in prioritized_tasks 
-                         if task.category == TaskCategory.SECURITY and scores['final_score'] >= 60]
-        if security_tasks:
-            recommendations.append(f"🔒 {len(security_tasks)} high-priority security tasks require immediate attention")
-        
-        # Quantum optimization opportunities
-        quantum_tasks = [task for task, scores in prioritized_tasks 
-                        if task.quantum_domain and scores['quantum_boost'] > 1.3]
-        if quantum_tasks:
-            recommendations.append(f"⚡ {len(quantum_tasks)} quantum optimization opportunities identified")
-        
-        # Technical debt concentration
-        high_td_tasks = [task for task, scores in prioritized_tasks 
-                        if scores['technical_debt_score'] > 7]
-        if len(high_td_tasks) > 5:
-            recommendations.append(f"⚠️ High concentration of technical debt ({len(high_td_tasks)} tasks) - consider dedicated sprint")
-        
-        # Performance opportunities
-        perf_tasks = [task for task, scores in prioritized_tasks 
-                     if task.category == TaskCategory.PERFORMANCE and scores['final_score'] >= 50]
-        if perf_tasks:
-            recommendations.append(f"📈 {len(perf_tasks)} performance optimization opportunities with high ROI")
-        
-        return recommendations
-
-
-def create_sample_tasks() -> List[TaskMetrics]:
-    """Create sample tasks for demonstration and testing."""
-    sample_tasks = [
-        TaskMetrics(
-            task_id="QUBO-OPT-001",
-            title="Optimize QUBO Matrix Construction Performance",
-            description="Current QUBO matrix construction takes 45ms, target is 30ms",
-            category=TaskCategory.QUANTUM_OPTIMIZATION,
-            urgency=UrgencyLevel.HIGH,
-            user_business_value=8.0,
-            time_criticality=7.0,
-            risk_reduction=6.0,
-            job_size=4.0,
-            impact=8.5,
-            confidence=9.0,
-            ease=6.0,
-            performance_impact=8.0,
-            quantum_domain=QuantumDomain.QUBO_OPTIMIZATION,
-            quantum_performance_impact=9.0,
-            estimated_effort_hours=12.0
-        ),
-        
-        TaskMetrics(
-            task_id="SEC-VULN-001",
-            title="Fix Critical Security Vulnerability in Quantum Credential Handler",
-            description="Potential credential exposure in quantum backend authentication",
-            category=TaskCategory.SECURITY,
-            urgency=UrgencyLevel.CRITICAL,
-            user_business_value=9.5,
-            time_criticality=10.0,
-            risk_reduction=9.5,
-            job_size=2.0,
-            impact=9.0,
-            confidence=9.5,
-            ease=8.0,
-            security_vulnerability=9.5,
-            quantum_domain=QuantumDomain.QUANTUM_SECURITY,
-            quantum_performance_impact=3.0,
-            estimated_effort_hours=6.0,
-            required_approvals=["security_team", "quantum_expert"]
-        ),
-        
-        TaskMetrics(
-            task_id="PERF-REG-001",
-            title="Address Performance Regression in Classical Fallback",
-            description="20% performance degradation detected in simulated annealing fallback",
-            category=TaskCategory.PERFORMANCE,
-            urgency=UrgencyLevel.MEDIUM,
-            user_business_value=7.0,
-            time_criticality=6.0,
-            risk_reduction=7.5,
-            job_size=6.0,
-            impact=7.5,
-            confidence=8.0,
-            ease=5.0,
-            performance_impact=8.5,
-            quantum_domain=QuantumDomain.CLASSICAL_FALLBACKS,
-            quantum_performance_impact=6.0,
-            estimated_effort_hours=18.0
-        ),
-        
-        TaskMetrics(
-            task_id="TECH-DEBT-001",
-            title="Refactor Legacy QUBO Constraint Handling",
-            description="Complex constraint handling code needs modernization",
-            category=TaskCategory.TECHNICAL_DEBT,
-            urgency=UrgencyLevel.LOW,
-            user_business_value=5.0,
-            time_criticality=3.0,
-            risk_reduction=6.0,
-            job_size=8.0,
-            impact=6.0,
-            confidence=7.0,
-            ease=4.0,
-            code_complexity=8.5,
-            maintainability_impact=7.0,
-            test_coverage_gap=6.0,
-            quantum_domain=QuantumDomain.QUBO_OPTIMIZATION,
-            estimated_effort_hours=24.0
-        ),
-        
-        TaskMetrics(
-            task_id="INNOV-RES-001",
-            title="Integrate Latest QAOA Algorithm Research",
-            description="Opportunity to integrate new QAOA variant with 15% performance improvement",
-            category=TaskCategory.RESEARCH,
-            urgency=UrgencyLevel.LOW,
-            user_business_value=6.0,
-            time_criticality=2.0,
-            risk_reduction=3.0,
-            job_size=9.0,
-            impact=7.0,
-            confidence=6.0,
-            ease=3.0,
-            quantum_domain=QuantumDomain.RESEARCH_INTEGRATION,
-            quantum_research_value=9.0,
-            quantum_performance_impact=7.0,
-            estimated_effort_hours=40.0,
-            required_approvals=["research_lead", "quantum_expert"]
-        )
-    ]
-    
-    return sample_tasks
-
+        return {
+            'total_roi': round(total_roi, 2),
+            'average_roi': round(average_roi, 2),
+            'value_trend': value_trend,
+            'total_value': summary['total_value_delivered'],
+            'total_effort': summary['total_effort_invested'],
+            'completion_count': summary['total_tasks_completed']
+        }
 
 def main():
-    """Demonstration of the advanced scoring model."""
-    print("🔬 Terragon Advanced Scoring Model - Quantum Computing Edition")
-    print("=" * 70)
+    """
+    Main execution function for the Terragon Value Discovery System.
     
-    # Initialize scoring model
-    scoring_model = AdvancedScoringModel()
+    Demonstrates the complete workflow:
+    1. Discover tasks from multiple sources
+    2. Score and prioritize using advanced hybrid model
+    3. Generate execution recommendations
+    4. Track and report metrics
+    """
+    print("🚀 Terragon Autonomous SDLC Value Discovery System")
+    print("=" * 60)
     
-    # Create sample tasks
-    sample_tasks = create_sample_tasks()
+    # Initialize systems
+    discovery = QuantumTaskDiscovery()
+    metrics_tracker = ValueMetricsTracker()
     
-    # Generate comprehensive scoring report
-    report = scoring_model.generate_scoring_report(sample_tasks)
+    # Discover tasks
+    print("\n📊 Discovering optimization opportunities...")
+    discovered_tasks = discovery.discover_tasks()
+    
+    # Record discovery metrics
+    metrics_tracker.record_task_discovery(discovered_tasks)
     
     # Display results
-    print(f"\n📊 Scoring Analysis Report")
-    print(f"Total Tasks: {report['summary']['total_tasks']}")
-    print(f"High Priority: {report['summary']['high_priority_tasks']}")
-    print(f"Medium Priority: {report['summary']['medium_priority_tasks']}")
-    print(f"Low Priority: {report['summary']['low_priority_tasks']}")
-    print(f"Average Score: {report['summary']['average_score']:.1f}")
+    print(f"\n✅ Discovered {len(discovered_tasks)} optimization opportunities")
+    print("\n🎯 Top Priority Tasks:")
+    print("-" * 80)
     
-    print(f"\n🔬 Quantum Analysis")
-    print(f"Quantum Tasks: {report['quantum_analysis']['quantum_tasks_count']} ({report['quantum_analysis']['quantum_percentage']:.1f}%)")
-    print(f"Average Quantum Boost: {report['quantum_analysis']['average_quantum_boost']:.2f}x")
-    
-    print(f"\n🏆 Top Priorities")
-    for priority in report['top_priorities'][:5]:
-        print(f"{priority['rank']}. {priority['title']}")
-        print(f"   Score: {priority['score']:.1f} | {priority['explanation']}")
+    total_value = 0.0
+    for i, task in enumerate(discovered_tasks[:10], 1):
+        # Estimate business value (simplified calculation)
+        estimated_value = task.impact * task.user_business_value * 100
+        total_value += estimated_value
+        
+        print(f"{i:2d}. {task.title}")
+        print(f"    Score: {task.composite_score:6.1f} | Category: {task.category.value}")
+        print(f"    Value: ${estimated_value:8,.0f} | Effort: {task.estimated_effort_hours:4.1f}h | ROI: {estimated_value/max(task.estimated_effort_hours,1):5.1f}x")
+        print(f"    Auto-exec: {'✅' if task.auto_executable else '❌'} | Approvals: {', '.join(task.approval_required) if task.approval_required else 'None'}")
+        print(f"    Quantum: {'🔬' if task.quantum_domain else '🔧'} | Risk: {'🟡' if task.risk_score < 0.5 else '🔴'}")
         print()
     
-    print(f"💡 Recommendations")
-    for rec in report['recommendations']:
-        print(f"   {rec}")
+    # Display summary metrics
+    roi_metrics = metrics_tracker.calculate_roi_metrics()
     
-    print(f"\n⚙️ Model Configuration")
-    model_info = report['model_info']
-    weights = model_info['weights']
-    print(f"   WSJF Weight: {weights['wsjf']:.2f}")
-    print(f"   ICE Weight: {weights['ice']:.2f}")
-    print(f"   Technical Debt Weight: {weights['technical_debt']:.2f}")
-    print(f"   Quantum Boost Weight: {weights['quantum_boost']:.2f}")
+    print("\n📈 Value Discovery Summary:")
+    print("-" * 40)
+    print(f"Total Estimated Value: ${total_value:,.0f}")
+    print(f"Total Estimated Effort: {sum(t.estimated_effort_hours for t in discovered_tasks):,.1f} hours")
+    print(f"Portfolio ROI: {total_value / max(sum(t.estimated_effort_hours for t in discovered_tasks), 1):,.1f}x")
+    print(f"Auto-executable: {sum(1 for t in discovered_tasks if t.auto_executable)}/{len(discovered_tasks)} ({100*sum(1 for t in discovered_tasks if t.auto_executable)/len(discovered_tasks):.1f}%)")
     
-    # Save report to file
-    report_path = Path(".terragon/latest_scoring_report.json")
-    with open(report_path, 'w') as f:
-        json.dump(report, f, indent=2, default=str)
+    # Quantum computing insights
+    quantum_tasks = [t for t in discovered_tasks if t.quantum_domain]
+    print(f"\n🔬 Quantum Computing Focus:")
+    print(f"Quantum-specific tasks: {len(quantum_tasks)}/{len(discovered_tasks)} ({100*len(quantum_tasks)/len(discovered_tasks):.1f}%)")
+    print(f"Average quantum relevance: {sum(t.quantum_relevance for t in quantum_tasks)/len(quantum_tasks):.1f}" if quantum_tasks else "0.0")
     
-    print(f"\n📄 Full report saved to: {report_path}")
-
+    # Save detailed results
+    results_file = Path(".terragon/latest_scoring_report.json")
+    results_file.parent.mkdir(exist_ok=True)
+    
+    results_data = {
+        'timestamp': datetime.now().isoformat(),
+        'summary': {
+            'total_tasks': len(discovered_tasks),
+            'total_estimated_value': total_value,
+            'total_estimated_effort': sum(t.estimated_effort_hours for t in discovered_tasks),
+            'portfolio_roi': total_value / max(sum(t.estimated_effort_hours for t in discovered_tasks), 1),
+            'auto_executable_count': sum(1 for t in discovered_tasks if t.auto_executable),
+            'quantum_tasks_count': len(quantum_tasks)
+        },
+        'top_tasks': [
+            {
+                'id': task.id,
+                'title': task.title,
+                'category': task.category.value,
+                'composite_score': task.composite_score,
+                'estimated_value': task.impact * task.user_business_value * 100,
+                'estimated_effort': task.estimated_effort_hours,
+                'auto_executable': task.auto_executable,
+                'quantum_domain': task.quantum_domain.value if task.quantum_domain else None,
+                'risk_score': task.risk_score
+            }
+            for task in discovered_tasks[:20]
+        ]
+    }
+    
+    with open(results_file, 'w') as f:
+        json.dump(results_data, f, indent=2, default=str)
+    
+    print(f"\n💾 Detailed results saved to: {results_file}")
+    print("\n🎉 Terragon Value Discovery System operational!")
+    print("Ready for autonomous task execution and continuous value delivery.")
 
 if __name__ == "__main__":
     main()
