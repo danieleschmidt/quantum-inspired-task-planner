@@ -1,0 +1,379 @@
+# Continuous Deployment Workflow Template
+# Copy this file to .github/workflows/cd.yml after repository setup
+
+name: Continuous Deployment
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      force_deploy:
+        description: 'Force deployment (skip safety checks)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # Determine deployment target
+  setup:
+    name: Setup Deployment
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.setup.outputs.environment }}
+      version: ${{ steps.setup.outputs.version }}
+      should_deploy: ${{ steps.setup.outputs.should_deploy }}
+    
+    steps:
+      - name: Determine deployment parameters
+        id: setup
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Extract version
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_SHA:0:8}" >> $GITHUB_OUTPUT
+          fi
+
+  # Pre-deployment checks
+  pre-deployment:
+    name: Pre-deployment Checks
+    runs-on: ubuntu-latest
+    needs: [setup]
+    if: needs.setup.outputs.should_deploy == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r dev-requirements.txt
+
+      - name: Run critical tests
+        run: |
+          python -m pytest tests/unit/test_critical.py -v
+          python -m pytest tests/integration/test_quantum_backends.py -v
+
+      - name: Validate configuration
+        run: |
+          python scripts/validate_config.py --env=${{ needs.setup.outputs.environment }}
+
+      - name: Check deployment readiness
+        run: |
+          python scripts/deployment_readiness_check.py
+
+  # Build and push container image
+  build-and-push:
+    name: Build and Push Image
+    runs-on: ubuntu-latest
+    needs: [setup, pre-deployment]
+    if: needs.setup.outputs.should_deploy == 'true'
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ needs.setup.outputs.version }}
+            BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+            VCS_REF=${{ github.sha }}
+
+  # Deploy to staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [setup, build-and-push]
+    if: needs.setup.outputs.environment == 'staging'
+    environment:
+      name: staging
+      url: https://staging-api.quantum-planner.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to staging
+        env:
+          KUBE_CONFIG: ${{ secrets.STAGING_KUBE_CONFIG }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          echo "$KUBE_CONFIG" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+          
+          # Update deployment
+          kubectl set image deployment/quantum-planner \
+            quantum-planner=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -n quantum-planner-staging
+          
+          # Wait for rollout
+          kubectl rollout status deployment/quantum-planner \
+            -n quantum-planner-staging --timeout=600s
+
+      - name: Run smoke tests
+        run: |
+          sleep 30  # Wait for service to be ready
+          python scripts/smoke_tests.py --env=staging
+
+      - name: Update staging status
+        run: |
+          curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+            -H 'Content-type: application/json' \
+            -d '{"text":"🚀 Deployed to staging: version ${{ needs.setup.outputs.version }}"}'
+
+  # Production deployment (manual approval required)
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [setup, build-and-push]
+    if: needs.setup.outputs.environment == 'production'
+    environment:
+      name: production
+      url: https://api.quantum-planner.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Production safety checks
+        if: github.event.inputs.force_deploy != 'true'
+        run: |
+          python scripts/production_safety_checks.py
+          python scripts/check_staging_health.py
+
+      - name: Blue-green deployment setup
+        env:
+          KUBE_CONFIG: ${{ secrets.PRODUCTION_KUBE_CONFIG }}
+        run: |
+          echo "$KUBE_CONFIG" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+          
+          # Deploy to green environment
+          kubectl apply -f k8s/production/green-deployment.yaml
+          kubectl set image deployment/quantum-planner-green \
+            quantum-planner=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -n quantum-planner-production
+
+      - name: Validate green deployment
+        env:
+          KUBE_CONFIG: ${{ secrets.PRODUCTION_KUBE_CONFIG }}
+        run: |
+          export KUBECONFIG=kubeconfig
+          
+          # Wait for green deployment
+          kubectl rollout status deployment/quantum-planner-green \
+            -n quantum-planner-production --timeout=600s
+          
+          # Run validation tests
+          python scripts/production_validation.py --target=green
+
+      - name: Switch traffic to green
+        env:
+          KUBE_CONFIG: ${{ secrets.PRODUCTION_KUBE_CONFIG }}
+        run: |
+          export KUBECONFIG=kubeconfig
+          
+          # Update service to point to green
+          kubectl patch service quantum-planner-service \
+            -p '{"spec":{"selector":{"deployment":"green"}}}' \
+            -n quantum-planner-production
+
+      - name: Monitor deployment
+        run: |
+          sleep 60  # Monitor for 1 minute
+          python scripts/monitor_deployment.py --duration=300  # 5 minutes
+
+      - name: Cleanup blue deployment
+        env:
+          KUBE_CONFIG: ${{ secrets.PRODUCTION_KUBE_CONFIG }}
+        run: |
+          export KUBECONFIG=kubeconfig
+          
+          # Scale down blue deployment
+          kubectl scale deployment quantum-planner-blue --replicas=0 \
+            -n quantum-planner-production
+
+      - name: Update production status
+        run: |
+          curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+            -H 'Content-type: application/json' \
+            -d '{"text":"✅ Successfully deployed to production: version ${{ needs.setup.outputs.version }}"}'
+
+  # Post-deployment verification
+  post-deployment:
+    name: Post-deployment Verification
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-staging, deploy-production]
+    if: always() && (needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run post-deployment tests
+        env:
+          ENVIRONMENT: ${{ needs.setup.outputs.environment }}
+        run: |
+          python scripts/post_deployment_tests.py --env=$ENVIRONMENT
+
+      - name: Update monitoring dashboards
+        run: |
+          python scripts/update_monitoring_dashboards.py \
+            --version=${{ needs.setup.outputs.version }} \
+            --env=${{ needs.setup.outputs.environment }}
+
+      - name: Generate deployment report
+        run: |
+          python scripts/generate_deployment_report.py \
+            --version=${{ needs.setup.outputs.version }} \
+            --env=${{ needs.setup.outputs.environment }} \
+            --output=deployment-report.json
+
+      - name: Upload deployment artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: deployment-report
+          path: deployment-report.json
+
+  # Rollback capability
+  rollback:
+    name: Emergency Rollback
+    runs-on: ubuntu-latest
+    if: failure() && github.event.inputs.force_deploy != 'true'
+    needs: [setup, deploy-staging, deploy-production]
+    environment:
+      name: ${{ needs.setup.outputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Rollback deployment
+        env:
+          KUBE_CONFIG: ${{ needs.setup.outputs.environment == 'production' && secrets.PRODUCTION_KUBE_CONFIG || secrets.STAGING_KUBE_CONFIG }}
+          NAMESPACE: quantum-planner-${{ needs.setup.outputs.environment }}
+        run: |
+          echo "$KUBE_CONFIG" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+          
+          # Rollback to previous version
+          kubectl rollout undo deployment/quantum-planner -n $NAMESPACE
+          kubectl rollout status deployment/quantum-planner -n $NAMESPACE
+
+      - name: Verify rollback
+        run: |
+          python scripts/verify_rollback.py --env=${{ needs.setup.outputs.environment }}
+
+      - name: Notify rollback
+        run: |
+          curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+            -H 'Content-type: application/json' \
+            -d '{"text":"🔄 Emergency rollback completed for ${{ needs.setup.outputs.environment }}"}'
+
+  # Release management
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-production]
+    if: github.ref == 'refs/heads/main' && needs.deploy-production.result == 'success'
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog
+        run: |
+          python scripts/generate_changelog.py > CHANGELOG.md
+
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ needs.setup.outputs.version }}
+          release_name: Release v${{ needs.setup.outputs.version }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false

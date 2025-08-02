@@ -1,0 +1,193 @@
+# Health Check Configuration
+# Comprehensive health monitoring for quantum-inspired task planner
+
+health_checks:
+  api:
+    endpoint: "/health"
+    timeout: 5s
+    interval: 30s
+    failure_threshold: 3
+    success_threshold: 1
+    checks:
+      - name: "api_response"
+        type: "http"
+        url: "http://localhost:8080/health"
+        expected_status: 200
+      - name: "api_latency"
+        type: "performance"
+        metric: "response_time"
+        threshold: "< 500ms"
+
+  database:
+    endpoint: "/health/database"
+    timeout: 10s
+    interval: 60s
+    failure_threshold: 2
+    checks:
+      - name: "db_connection"
+        type: "tcp"
+        host: "${DB_HOST}"
+        port: "${DB_PORT}"
+      - name: "db_query"
+        type: "sql"
+        query: "SELECT 1"
+        expected_result: "1"
+      - name: "db_pool"
+        type: "metric"
+        metric: "db_connections_active"
+        threshold: "< 80% of pool_size"
+
+  quantum_backends:
+    endpoint: "/health/quantum"
+    timeout: 30s
+    interval: 300s  # 5 minutes
+    failure_threshold: 3
+    checks:
+      - name: "dwave_connectivity"
+        type: "http"
+        url: "https://cloud.dwavesys.com/api/status"
+        expected_status: 200
+        auth_type: "bearer"
+        auth_token: "${DWAVE_API_TOKEN}"
+      - name: "azure_quantum"
+        type: "custom"
+        script: "scripts/test_azure_quantum.py"
+        timeout: 60s
+      - name: "classical_fallback"
+        type: "function"
+        function: "test_classical_solver"
+        timeout: 10s
+
+  resources:
+    endpoint: "/health/resources"
+    timeout: 5s
+    interval: 30s
+    checks:
+      - name: "memory_usage"
+        type: "system"
+        metric: "memory_percent"
+        threshold: "< 85%"
+        warning_threshold: "< 70%"
+      - name: "cpu_usage"
+        type: "system"
+        metric: "cpu_percent"
+        threshold: "< 80%"
+        warning_threshold: "< 60%"
+      - name: "disk_space"
+        type: "system"
+        metric: "disk_percent"
+        threshold: "< 90%"
+        warning_threshold: "< 75%"
+
+  application:
+    endpoint: "/health/application"
+    timeout: 15s
+    interval: 120s
+    checks:
+      - name: "solve_performance"
+        type: "benchmark"
+        test_problem: "fixtures/benchmark_problem.json"
+        max_duration: "5s"
+        success_rate: "> 95%"
+      - name: "queue_depth"
+        type: "metric"
+        metric: "optimization_queue_size"
+        threshold: "< 100"
+        warning_threshold: "< 50"
+      - name: "error_rate"
+        type: "metric"
+        metric: "error_rate_5min"
+        threshold: "< 1%"
+        warning_threshold: "< 0.5%"
+
+# Alerting configuration
+alerts:
+  channels:
+    - name: "slack"
+      webhook: "${SLACK_WEBHOOK_URL}"
+      channel: "#quantum-planner-alerts"
+    - name: "email"
+      smtp_server: "${SMTP_SERVER}"
+      recipients: ["oncall@company.com"]
+    - name: "pagerduty"
+      integration_key: "${PAGERDUTY_INTEGRATION_KEY}"
+
+  rules:
+    - name: "critical_service_down"
+      condition: "health_check_failed('api') OR health_check_failed('database')"
+      severity: "critical"
+      channels: ["slack", "email", "pagerduty"]
+      escalation_timeout: "15m"
+    
+    - name: "quantum_backend_degraded"
+      condition: "health_check_warning('quantum_backends')"
+      severity: "warning"
+      channels: ["slack"]
+      auto_resolve: true
+    
+    - name: "performance_degradation"
+      condition: "response_time > 2s OR error_rate > 2%"
+      severity: "warning"
+      channels: ["slack", "email"]
+      suppress_duration: "10m"
+    
+    - name: "resource_exhaustion"
+      condition: "memory_usage > 90% OR cpu_usage > 90%"
+      severity: "critical"
+      channels: ["slack", "email", "pagerduty"]
+      escalation_timeout: "10m"
+
+# Metrics collection
+metrics:
+  prometheus:
+    enabled: true
+    port: 9090
+    scrape_interval: "15s"
+    retention: "30d"
+  
+  custom_metrics:
+    - name: "quantum_solve_duration"
+      type: "histogram"
+      help: "Time taken to solve optimization problems"
+      buckets: [0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0]
+    
+    - name: "quantum_solve_success_rate"
+      type: "gauge"
+      help: "Success rate of quantum solver"
+    
+    - name: "classical_fallback_rate"
+      type: "counter"
+      help: "Number of times classical fallback was used"
+    
+    - name: "optimization_queue_size"
+      type: "gauge"
+      help: "Current size of optimization job queue"
+    
+    - name: "active_user_sessions"
+      type: "gauge"
+      help: "Number of active user sessions"
+
+# Logging configuration
+logging:
+  structured: true
+  level: "INFO"
+  format: "json"
+  
+  outputs:
+    - type: "stdout"
+      level: "INFO"
+    - type: "file"
+      path: "/var/log/quantum-planner/app.log"
+      level: "DEBUG"
+      rotation: "daily"
+      retention: "30d"
+    - type: "elasticsearch"
+      endpoint: "${ELASTICSEARCH_URL}"
+      index: "quantum-planner-logs"
+      level: "WARN"
+  
+  health_logs:
+    enabled: true
+    success_level: "DEBUG"
+    failure_level: "ERROR"
+    include_metrics: true

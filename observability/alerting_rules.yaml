@@ -1,0 +1,254 @@
+# Prometheus Alerting Rules
+# Comprehensive alerting for quantum-inspired task planner
+
+groups:
+  - name: quantum_planner_critical
+    interval: 30s
+    rules:
+      - alert: ServiceDown
+        expr: up{job="quantum-planner"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: quantum-planner
+        annotations:
+          summary: "Quantum Planner service is down"
+          description: "Quantum Planner service has been down for more than 1 minute"
+          runbook_url: "https://docs.company.com/runbooks/service-down"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: quantum-planner
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} over the last 5 minutes"
+          runbook_url: "https://docs.company.com/runbooks/high-error-rate"
+
+      - alert: DatabaseConnectionFailure
+        expr: quantum_planner_db_connections_failed_total > 10
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "Database connection failures"
+          description: "Database connection failures exceeded threshold"
+          runbook_url: "https://docs.company.com/runbooks/database-issues"
+
+  - name: quantum_planner_performance
+    interval: 60s
+    rules:
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: quantum-planner
+        annotations:
+          summary: "High response time"
+          description: "95th percentile response time is {{ $value }}s"
+          runbook_url: "https://docs.company.com/runbooks/performance-issues"
+
+      - alert: QuantumSolveTimeout
+        expr: rate(quantum_solve_timeouts_total[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          service: quantum-backend
+        annotations:
+          summary: "Quantum solve timeouts increasing"
+          description: "Quantum solve timeout rate: {{ $value | humanize }} per second"
+          runbook_url: "https://docs.company.com/runbooks/quantum-backend-issues"
+
+      - alert: HighMemoryUsage
+        expr: quantum_planner_memory_usage_percent > 85
+        for: 10m
+        labels:
+          severity: warning
+          service: quantum-planner
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }}%"
+          runbook_url: "https://docs.company.com/runbooks/resource-issues"
+
+      - alert: HighCPUUsage
+        expr: quantum_planner_cpu_usage_percent > 80
+        for: 15m
+        labels:
+          severity: warning
+          service: quantum-planner
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}%"
+          runbook_url: "https://docs.company.com/runbooks/resource-issues"
+
+  - name: quantum_planner_quantum_backends
+    interval: 300s  # 5 minutes
+    rules:
+      - alert: QuantumBackendUnavailable
+        expr: quantum_backend_connectivity{backend="dwave"} == 0
+        for: 10m
+        labels:
+          severity: warning
+          service: quantum-backend
+          backend: dwave
+        annotations:
+          summary: "D-Wave backend unavailable"
+          description: "D-Wave quantum backend has been unavailable for 10 minutes"
+          runbook_url: "https://docs.company.com/runbooks/quantum-backend-issues"
+
+      - alert: AzureQuantumUnavailable
+        expr: quantum_backend_connectivity{backend="azure"} == 0
+        for: 10m
+        labels:
+          severity: warning
+          service: quantum-backend
+          backend: azure
+        annotations:
+          summary: "Azure Quantum backend unavailable"
+          description: "Azure Quantum backend has been unavailable for 10 minutes"
+          runbook_url: "https://docs.company.com/runbooks/quantum-backend-issues"
+
+      - alert: AllQuantumBackendsDown
+        expr: sum(quantum_backend_connectivity) == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: quantum-backend
+        annotations:
+          summary: "All quantum backends unavailable"
+          description: "All quantum backends are down, falling back to classical solvers"
+          runbook_url: "https://docs.company.com/runbooks/quantum-backend-issues"
+
+      - alert: HighClassicalFallbackRate
+        expr: rate(classical_fallback_total[10m]) / rate(optimization_requests_total[10m]) > 0.5
+        for: 15m
+        labels:
+          severity: warning
+          service: quantum-backend
+        annotations:
+          summary: "High classical fallback rate"
+          description: "{{ $value | humanizePercentage }} of requests falling back to classical"
+          runbook_url: "https://docs.company.com/runbooks/quantum-backend-issues"
+
+  - name: quantum_planner_business
+    interval: 120s
+    rules:
+      - alert: LowSolutionQuality
+        expr: avg_over_time(solution_quality_score[30m]) < 0.85
+        for: 30m
+        labels:
+          severity: warning
+          service: optimization
+        annotations:
+          summary: "Solution quality degraded"
+          description: "Average solution quality is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.company.com/runbooks/optimization-quality"
+
+      - alert: OptimizationQueueBacklog
+        expr: optimization_queue_size > 100
+        for: 10m
+        labels:
+          severity: warning
+          service: optimization
+        annotations:
+          summary: "Optimization queue backlog"
+          description: "Queue size: {{ $value }} jobs"
+          runbook_url: "https://docs.company.com/runbooks/queue-management"
+
+      - alert: NoOptimizationRequests
+        expr: rate(optimization_requests_total[1h]) == 0
+        for: 2h
+        labels:
+          severity: warning
+          service: business
+        annotations:
+          summary: "No optimization requests"
+          description: "No optimization requests received in the last 2 hours"
+          runbook_url: "https://docs.company.com/runbooks/business-metrics"
+
+  - name: quantum_planner_security
+    interval: 60s
+    rules:
+      - alert: HighFailedAuthRate
+        expr: rate(authentication_failures_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "High authentication failure rate"
+          description: "{{ $value }} failed auth attempts per second"
+          runbook_url: "https://docs.company.com/runbooks/security-incidents"
+
+      - alert: SuspiciousActivity
+        expr: rate(http_requests_total{status="403"}[5m]) > 50
+        for: 2m
+        labels:
+          severity: critical
+          service: security
+        annotations:
+          summary: "Suspicious activity detected"
+          description: "High rate of 403 responses: {{ $value }} per second"
+          runbook_url: "https://docs.company.com/runbooks/security-incidents"
+
+      - alert: UnauthorizedAPIAccess
+        expr: increase(unauthorized_api_calls_total[10m]) > 100
+        for: 0m
+        labels:
+          severity: critical
+          service: security
+        annotations:
+          summary: "Unauthorized API access attempts"
+          description: "{{ $value }} unauthorized API calls in the last 10 minutes"
+          runbook_url: "https://docs.company.com/runbooks/security-incidents"
+
+  - name: quantum_planner_infrastructure
+    interval: 180s
+    rules:
+      - alert: DiskSpaceLow
+        expr: disk_usage_percent > 85
+        for: 10m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "Disk space running low"
+          description: "Disk usage: {{ $value }}%"
+          runbook_url: "https://docs.company.com/runbooks/disk-space"
+
+      - alert: DiskSpaceCritical
+        expr: disk_usage_percent > 95
+        for: 5m
+        labels:
+          severity: critical
+          service: infrastructure
+        annotations:
+          summary: "Disk space critically low"
+          description: "Disk usage: {{ $value }}%"
+          runbook_url: "https://docs.company.com/runbooks/disk-space"
+
+      - alert: PodCrashLooping
+        expr: rate(kube_pod_container_status_restarts_total[15m]) > 0
+        for: 15m
+        labels:
+          severity: warning
+          service: kubernetes
+        annotations:
+          summary: "Pod crash looping"
+          description: "Pod {{ $labels.pod }} is crash looping"
+          runbook_url: "https://docs.company.com/runbooks/pod-issues"
+
+      - alert: NodeNotReady
+        expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: kubernetes
+        annotations:
+          summary: "Kubernetes node not ready"
+          description: "Node {{ $labels.node }} is not ready"
+          runbook_url: "https://docs.company.com/runbooks/node-issues"

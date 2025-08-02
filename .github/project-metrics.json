@@ -1,0 +1,294 @@
+{
+  "project": {
+    "name": "quantum-inspired-task-planner",
+    "version": "1.0.0",
+    "description": "QUBO-based task scheduler for agent pools using quantum and classical optimization",
+    "category": "optimization",
+    "tags": ["quantum", "optimization", "scheduling", "QUBO", "machine-learning"],
+    "last_updated": "2025-01-01T00:00:00Z"
+  },
+  "repository": {
+    "platform": "github",
+    "owner": "danieleschmidt",
+    "name": "quantum-inspired-task-planner",
+    "url": "https://github.com/danieleschmidt/quantum-inspired-task-planner",
+    "default_branch": "main",
+    "visibility": "public",
+    "license": "Apache-2.0"
+  },
+  "sdlc_maturity": {
+    "overall_score": 95,
+    "categories": {
+      "documentation": {
+        "score": 98,
+        "metrics": {
+          "readme_completeness": 95,
+          "api_documentation": 100,
+          "user_guides": 100,
+          "developer_guides": 100,
+          "architecture_docs": 95,
+          "changelog_maintenance": 90
+        }
+      },
+      "testing": {
+        "score": 94,
+        "metrics": {
+          "unit_test_coverage": 95,
+          "integration_tests": 90,
+          "e2e_tests": 85,
+          "performance_tests": 100,
+          "property_based_tests": 95,
+          "test_automation": 100
+        }
+      },
+      "security": {
+        "score": 96,
+        "metrics": {
+          "vulnerability_scanning": 100,
+          "dependency_management": 95,
+          "secrets_management": 100,
+          "code_scanning": 95,
+          "container_security": 90,
+          "compliance_checks": 95
+        }
+      },
+      "automation": {
+        "score": 93,
+        "metrics": {
+          "ci_cd_pipeline": 95,
+          "automated_testing": 100,
+          "deployment_automation": 85,
+          "dependency_updates": 95,
+          "monitoring_setup": 90,
+          "rollback_procedures": 90
+        }
+      },
+      "quality": {
+        "score": 95,
+        "metrics": {
+          "code_style_enforcement": 100,
+          "type_checking": 95,
+          "lint_compliance": 100,
+          "code_review_process": 85,
+          "documentation_coverage": 95,
+          "performance_monitoring": 95
+        }
+      }
+    },
+    "last_assessment": "2025-01-01T00:00:00Z"
+  },
+  "development_metrics": {
+    "code_quality": {
+      "test_coverage": {
+        "overall": 92,
+        "unit": 95,
+        "integration": 88,
+        "e2e": 85
+      },
+      "code_complexity": {
+        "cyclomatic_complexity": 6.2,
+        "maintainability_index": 78,
+        "lines_of_code": 15420,
+        "technical_debt_ratio": 0.05
+      },
+      "code_style": {
+        "linting_compliance": 100,
+        "formatting_compliance": 100,
+        "type_checking_coverage": 95,
+        "documentation_coverage": 88
+      }
+    },
+    "performance": {
+      "build_time": {
+        "average_seconds": 180,
+        "p95_seconds": 240,
+        "trend": "stable"
+      },
+      "test_execution": {
+        "unit_tests_seconds": 45,
+        "integration_tests_seconds": 120,
+        "e2e_tests_seconds": 300,
+        "total_test_time_seconds": 465
+      },
+      "quantum_performance": {
+        "average_solve_time_ms": 2500,
+        "classical_fallback_rate": 0.15,
+        "success_rate": 0.98,
+        "cost_per_solve_usd": 0.02
+      }
+    },
+    "security": {
+      "vulnerability_count": {
+        "critical": 0,
+        "high": 0,
+        "medium": 2,
+        "low": 5,
+        "info": 12
+      },
+      "dependency_health": {
+        "total_dependencies": 87,
+        "outdated_dependencies": 8,
+        "vulnerable_dependencies": 2,
+        "licenses_approved": 85
+      },
+      "compliance": {
+        "slsa_level": 3,
+        "security_scorecard": 8.7,
+        "supply_chain_score": 9.2
+      }
+    }
+  },
+  "productivity_metrics": {
+    "development_velocity": {
+      "commits_per_week": 24,
+      "pull_requests_per_week": 8,
+      "issues_closed_per_week": 12,
+      "feature_delivery_rate": 0.85
+    },
+    "team_collaboration": {
+      "average_pr_review_time_hours": 4.5,
+      "pr_approval_rate": 0.95,
+      "code_review_participation": 0.88,
+      "documentation_updates_per_pr": 0.75
+    },
+    "deployment": {
+      "deployment_frequency": "daily",
+      "lead_time_hours": 2.5,
+      "mean_time_to_recovery_hours": 0.5,
+      "change_failure_rate": 0.02
+    }
+  },
+  "business_metrics": {
+    "adoption": {
+      "github_stars": 245,
+      "github_forks": 42,
+      "github_watchers": 18,
+      "download_count": 8540,
+      "active_users_estimated": 150
+    },
+    "community": {
+      "contributors": 8,
+      "open_issues": 15,
+      "closed_issues": 127,
+      "community_health_score": 0.92
+    },
+    "performance": {
+      "uptime_percentage": 99.8,
+      "response_time_p95_ms": 250,
+      "error_rate": 0.005,
+      "user_satisfaction_score": 4.6
+    }
+  },
+  "operational_metrics": {
+    "infrastructure": {
+      "availability": {
+        "api_uptime_percentage": 99.9,
+        "quantum_backend_availability": 95.2,
+        "database_uptime_percentage": 99.95,
+        "monitoring_uptime_percentage": 99.8
+      },
+      "performance": {
+        "average_response_time_ms": 180,
+        "p95_response_time_ms": 450,
+        "p99_response_time_ms": 800,
+        "throughput_requests_per_second": 125
+      },
+      "resource_utilization": {
+        "cpu_utilization_percentage": 45,
+        "memory_utilization_percentage": 68,
+        "storage_utilization_percentage": 35,
+        "network_utilization_percentage": 25
+      }
+    },
+    "costs": {
+      "monthly_infrastructure_cost_usd": 480,
+      "quantum_backend_cost_usd": 320,
+      "monitoring_cost_usd": 85,
+      "storage_cost_usd": 45,
+      "compute_cost_usd": 30
+    }
+  },
+  "quantum_specific_metrics": {
+    "backend_performance": {
+      "dwave": {
+        "availability_percentage": 96.5,
+        "average_solve_time_ms": 1200,
+        "success_rate": 0.98,
+        "cost_per_solve_usd": 0.025,
+        "queue_time_ms": 800
+      },
+      "azure_quantum": {
+        "availability_percentage": 94.2,
+        "average_solve_time_ms": 2800,
+        "success_rate": 0.96,
+        "cost_per_solve_usd": 0.018,
+        "queue_time_ms": 1500
+      },
+      "classical_simulator": {
+        "availability_percentage": 99.9,
+        "average_solve_time_ms": 450,
+        "success_rate": 0.995,
+        "cost_per_solve_usd": 0.001,
+        "queue_time_ms": 0
+      }
+    },
+    "optimization_quality": {
+      "solution_optimality_percentage": 94.5,
+      "constraint_satisfaction_rate": 0.992,
+      "solution_stability": 0.88,
+      "convergence_rate": 0.95
+    },
+    "usage_patterns": {
+      "problems_solved_per_day": 1250,
+      "average_problem_size": 156,
+      "max_problem_size": 2048,
+      "backend_selection_auto_rate": 0.85,
+      "classical_fallback_rate": 0.15
+    }
+  },
+  "compliance_metrics": {
+    "security_compliance": {
+      "owasp_compliance_score": 9.2,
+      "nist_framework_adherence": 0.89,
+      "iso27001_alignment": 0.92,
+      "gdpr_compliance_score": 0.95
+    },
+    "software_supply_chain": {
+      "sbom_generation": true,
+      "vulnerability_disclosure": true,
+      "dependency_transparency": 0.95,
+      "provenance_tracking": true
+    },
+    "audit_trail": {
+      "change_tracking": true,
+      "access_logging": true,
+      "security_event_logging": true,
+      "compliance_reporting": true
+    }
+  },
+  "trends": {
+    "performance_trend": "improving",
+    "security_trend": "stable",
+    "adoption_trend": "growing",
+    "quality_trend": "improving",
+    "cost_trend": "optimizing"
+  },
+  "goals": {
+    "2025_q1": {
+      "test_coverage_target": 95,
+      "security_score_target": 9.0,
+      "deployment_frequency_target": "multiple_daily",
+      "quantum_performance_target": "sub_2s_average"
+    },
+    "2025_h1": {
+      "contributor_count_target": 15,
+      "user_adoption_target": 500,
+      "uptime_target": 99.95,
+      "cost_optimization_target": 20
+    }
+  },
+  "last_updated": "2025-01-01T00:00:00Z",
+  "collection_frequency": "daily",
+  "automated_collection": true,
+  "data_retention_days": 365
+}

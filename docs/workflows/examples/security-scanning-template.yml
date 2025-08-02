@@ -1,0 +1,419 @@
+# Security Scanning Workflow Template
+# Copy this file to .github/workflows/security.yml after repository setup
+
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run weekly security scans
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  # CodeQL Analysis
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'python' ]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+          config-file: ./.github/workflows/codeql/codeql-config.yml
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:${{matrix.language}}"
+
+  # Dependency vulnerability scanning
+  dependency-scan:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pip-audit safety
+
+      - name: Run pip-audit
+        run: |
+          pip-audit --desc --format=json --output=pip-audit-results.json
+        continue-on-error: true
+
+      - name: Run Safety scan
+        run: |
+          safety check --json --output safety-results.json
+        continue-on-error: true
+
+      - name: Upload pip-audit results
+        uses: actions/upload-artifact@v3
+        with:
+          name: pip-audit-results
+          path: pip-audit-results.json
+
+      - name: Upload Safety results
+        uses: actions/upload-artifact@v3
+        with:
+          name: safety-results
+          path: safety-results.json
+
+  # Container image security scanning
+  container-scan:
+    name: Container Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -t quantum-planner:security-scan .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'quantum-planner:security-scan'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Run Grype vulnerability scanner
+        uses: anchore/scan-action@v3
+        with:
+          image: 'quantum-planner:security-scan'
+          fail-build: false
+          output-format: sarif
+          output-file: grype-results.sarif
+
+      - name: Upload Grype scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'grype-results.sarif'
+
+  # Secrets scanning
+  secrets-scan:
+    name: Secrets Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      - name: Run GitLeaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Custom quantum credential scan
+        run: |
+          python security/quantum_credential_scanner.py --scan-dir=. --output=quantum-creds-scan.json
+
+      - name: Upload quantum credential scan results
+        uses: actions/upload-artifact@v3
+        with:
+          name: quantum-credentials-scan
+          path: quantum-creds-scan.json
+
+  # Infrastructure as Code security
+  iac-scan:
+    name: Infrastructure Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: dockerfile,kubernetes
+          output_format: sarif
+          output_file_path: checkov-results.sarif
+
+      - name: Upload Checkov scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'checkov-results.sarif'
+
+      - name: Run Terrascan
+        uses: tenable/terrascan-action@main
+        with:
+          iac_type: 'docker'
+          iac_version: 'v1'
+          policy_type: 'docker'
+          only_warn: true
+          sarif_upload: true
+
+  # SLSA compliance check
+  slsa-compliance:
+    name: SLSA Compliance Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate SBOM
+        run: |
+          python security/sbom_generator.py --output=sbom.spdx.json --format=spdx-json
+
+      - name: Validate SBOM
+        run: |
+          python scripts/validate_sbom.py --sbom=sbom.spdx.json
+
+      - name: Check build reproducibility
+        run: |
+          python scripts/check_build_reproducibility.py
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v3
+        with:
+          name: sbom
+          path: sbom.spdx.json
+
+  # License compliance
+  license-scan:
+    name: License Compliance Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pip-licenses
+
+      - name: Check licenses
+        run: |
+          pip-licenses --format=json --output-file=licenses.json
+          python scripts/check_license_compliance.py --licenses=licenses.json
+
+      - name: Upload license report
+        uses: actions/upload-artifact@v3
+        with:
+          name: license-report
+          path: licenses.json
+
+  # Custom security checks
+  custom-security:
+    name: Custom Security Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install bandit semgrep
+
+      - name: Run Bandit security linter
+        run: |
+          bandit -r src/ -f json -o bandit-results.json
+        continue-on-error: true
+
+      - name: Run Semgrep security analysis
+        run: |
+          semgrep --config=auto --json --output=semgrep-results.json src/
+        continue-on-error: true
+
+      - name: Custom quantum security checks
+        run: |
+          python security/quantum_security_analyzer.py --scan-dir=src/ --output=quantum-security.json
+
+      - name: Check for hardcoded credentials
+        run: |
+          python scripts/check_hardcoded_credentials.py --dir=src/
+
+      - name: Validate encryption standards
+        run: |
+          python scripts/validate_encryption_standards.py
+
+      - name: Upload custom security results
+        uses: actions/upload-artifact@v3
+        with:
+          name: custom-security-results
+          path: |
+            bandit-results.json
+            semgrep-results.json
+            quantum-security.json
+
+  # Security scoring and reporting
+  security-score:
+    name: Security Score Calculation
+    runs-on: ubuntu-latest
+    needs: [codeql, dependency-scan, container-scan, secrets-scan, iac-scan, slsa-compliance, license-scan, custom-security]
+    if: always()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Calculate security score
+        run: |
+          python scripts/calculate_security_score.py \
+            --codeql-results=codeql-results/ \
+            --dependency-results=pip-audit-results/ \
+            --container-results=trivy-results.sarif \
+            --custom-results=custom-security-results/ \
+            --output=security-score.json
+
+      - name: Generate security report
+        run: |
+          python scripts/generate_security_report.py \
+            --score-file=security-score.json \
+            --output=security-report.md
+
+      - name: Comment security score on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('security-report.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
+      - name: Upload security report
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-report
+          path: |
+            security-score.json
+            security-report.md
+
+      - name: Fail if security score is too low
+        run: |
+          python scripts/check_security_threshold.py --score-file=security-score.json --threshold=80
+
+  # Incident response preparation
+  incident-response:
+    name: Security Incident Response Test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Test incident response procedures
+        run: |
+          python scripts/test_incident_response.py
+
+      - name: Validate security contacts
+        run: |
+          python scripts/validate_security_contacts.py
+
+      - name: Check backup and recovery procedures
+        run: |
+          python scripts/test_backup_recovery.py --dry-run
+
+      - name: Generate incident response report
+        run: |
+          python scripts/generate_incident_response_report.py \
+            --output=incident-response-test.json
+
+      - name: Upload incident response test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: incident-response-test
+          path: incident-response-test.json
