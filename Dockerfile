@@ -2,7 +2,7 @@
 # Optimized for production deployment with security scanning
 
 # ===== Base Python Image =====
-FROM python:3.11-slim-bullseye as base
+FROM python:3.13-slim-bullseye as base
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -99,7 +99,7 @@ COPY README.md LICENSE ./
 RUN poetry build
 
 # ===== Production Runtime Stage =====
-FROM python:3.11-slim-bullseye as production
+FROM python:3.13-slim-bullseye as production
 
 # Security: Install only essential packages and security updates
 RUN apt-get update && apt-get install -y \
@@ -150,7 +150,7 @@ ENTRYPOINT ["./entrypoint.sh"]
 CMD ["quantum-planner", "--help"]
 
 # ===== Minimal Production Stage =====
-FROM python:3.11-alpine as minimal
+FROM python:3.13-alpine as minimal
 
 # Install minimal dependencies
 RUN apk add --no-cache \
