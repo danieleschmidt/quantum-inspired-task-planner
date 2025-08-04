@@ -58,7 +58,7 @@ pip install quantum-inspired-task-planner[all]
 ### From Source
 
 ```bash
-git clone https://github.com/your-org/quantum-inspired-task-planner
+git clone https://github.com/danieleschmidt/quantum-inspired-task-planner
 cd quantum-inspired-task-planner
 pip install -e ".[dev]"
 ```
@@ -722,7 +722,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/quantum-inspired-task-planner
+git clone https://github.com/danieleschmidt/quantum-inspired-task-planner
 cd quantum-inspired-task-planner
 
 # Install with dev dependencies
@@ -748,10 +748,10 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ## 📞 Support
 
-- 📧 Email: quantum-planner@your-org.com
-- 💬 Discord: [Join our community](https://discord.gg/your-org)
-- 📖 Documentation: [Full docs](https://docs.your-org.com/quantum-planner)
-- 🎓 Tutorial: [Quantum Optimization Basics](https://learn.your-org.com/quantum)
+- 📧 Email: quantum-planner@danieleschmidt.com
+- 💬 Discord: [Join our community](https://discord.gg/danieleschmidt)
+- 📖 Documentation: [Full docs](https://docs.danieleschmidt.com/quantum-planner)
+- 🎓 Tutorial: [Quantum Optimization Basics](https://learn.danieleschmidt.com/quantum)
 
 ## 📚 References
 
