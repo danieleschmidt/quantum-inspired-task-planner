@@ -5,8 +5,8 @@ from typing import Dict, List, Any, Optional, Callable
 from dataclasses import dataclass
 import logging
 
-from quantum_planner.models import Agent, Task, Solution
-from quantum_planner.optimizer import optimize_tasks
+from ..models import Agent, Task, Solution
+from ..optimizer import optimize_tasks
 
 logger = logging.getLogger(__name__)
 

@@ -14,6 +14,31 @@ class Agent:
     capacity: int
     availability: float = 1.0
     preferences: Dict[str, Any] = field(default_factory=dict)
+    cost_per_hour: float = 0.0
+    
+    def __init__(self, id: str = None, agent_id: str = None, skills: List[str] = None, 
+                 capacity: int = 1, availability: float = 1.0, 
+                 preferences: Dict[str, Any] = None, cost_per_hour: float = 0.0):
+        """Initialize agent with flexible parameter names."""
+        # Handle both 'id' and 'agent_id' parameter names
+        if id is not None and agent_id is None:
+            agent_id = id
+        elif agent_id is None and id is None:
+            raise ValueError("Either 'id' or 'agent_id' must be provided")
+            
+        object.__setattr__(self, 'agent_id', agent_id)
+        object.__setattr__(self, 'skills', skills or [])
+        object.__setattr__(self, 'capacity', capacity)
+        object.__setattr__(self, 'availability', availability)
+        object.__setattr__(self, 'preferences', preferences or {})
+        object.__setattr__(self, 'cost_per_hour', cost_per_hour)
+        
+        self.__post_init__()
+    
+    @property
+    def id(self) -> str:
+        """Alias for agent_id for API compatibility."""
+        return self.agent_id
     
     def __post_init__(self):
         """Validate agent parameters."""
@@ -39,6 +64,28 @@ class Task:
     duration: int
     dependencies: List[str] = field(default_factory=list)
     
+    def __init__(self, id: str = None, task_id: str = None, required_skills: List[str] = None,
+                 priority: int = 1, duration: int = 1, dependencies: List[str] = None):
+        """Initialize task with flexible parameter names."""
+        # Handle both 'id' and 'task_id' parameter names
+        if id is not None and task_id is None:
+            task_id = id
+        elif task_id is None and id is None:
+            raise ValueError("Either 'id' or 'task_id' must be provided")
+            
+        object.__setattr__(self, 'task_id', task_id)
+        object.__setattr__(self, 'required_skills', required_skills or [])
+        object.__setattr__(self, 'priority', priority)
+        object.__setattr__(self, 'duration', duration)
+        object.__setattr__(self, 'dependencies', dependencies or [])
+        
+        self.__post_init__()
+    
+    @property
+    def id(self) -> str:
+        """Alias for task_id for API compatibility."""
+        return self.task_id
+    
     def __post_init__(self):
         """Validate task parameters."""
         if not self.required_skills:
@@ -59,8 +106,28 @@ class Task:
 class TimeWindowTask(Task):
     """Represents a task with time window constraints."""
     
-    earliest_start: int
-    latest_finish: int
+    earliest_start: int = 0
+    latest_finish: int = float('inf')
+    
+    def __init__(self, id: str = None, task_id: str = None, required_skills: List[str] = None,
+                 priority: int = 1, duration: int = 1, dependencies: List[str] = None,
+                 earliest_start: int = 0, latest_finish: int = float('inf')):
+        """Initialize time window task with flexible parameter names."""
+        # Handle both 'id' and 'task_id' parameter names
+        if id is not None and task_id is None:
+            task_id = id
+        elif task_id is None and id is None:
+            raise ValueError("Either 'id' or 'task_id' must be provided")
+            
+        object.__setattr__(self, 'task_id', task_id)
+        object.__setattr__(self, 'required_skills', required_skills or [])
+        object.__setattr__(self, 'priority', priority)
+        object.__setattr__(self, 'duration', duration)
+        object.__setattr__(self, 'dependencies', dependencies or [])
+        object.__setattr__(self, 'earliest_start', earliest_start)
+        object.__setattr__(self, 'latest_finish', latest_finish)
+        
+        self.__post_init__()
     
     def __post_init__(self):
         """Validate time window task parameters."""
@@ -89,6 +156,10 @@ class Solution:
     makespan: float
     cost: float
     backend_used: str
+    metadata: Optional[Dict[str, Any]] = field(default_factory=dict)
+    schedule: Optional[Dict[str, Dict[str, tuple]]] = None
+    task_durations: Optional[Dict[str, int]] = None
+    total_cost: Optional[float] = None
     
     def __post_init__(self):
         """Validate solution parameters."""

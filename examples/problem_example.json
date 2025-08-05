@@ -1,0 +1,56 @@
+{
+  "agents": [
+    {
+      "id": "agent1",
+      "skills": ["python", "ml"],
+      "capacity": 3,
+      "cost_per_hour": 100.0
+    },
+    {
+      "id": "agent2", 
+      "skills": ["javascript", "react"],
+      "capacity": 2,
+      "cost_per_hour": 85.0
+    },
+    {
+      "id": "agent3",
+      "skills": ["python", "devops"],
+      "capacity": 2,
+      "cost_per_hour": 95.0
+    }
+  ],
+  "tasks": [
+    {
+      "id": "backend_api",
+      "required_skills": ["python"],
+      "priority": 5,
+      "duration": 2
+    },
+    {
+      "id": "frontend_ui", 
+      "required_skills": ["javascript", "react"],
+      "priority": 3,
+      "duration": 3
+    },
+    {
+      "id": "ml_pipeline",
+      "required_skills": ["python", "ml"],
+      "priority": 8,
+      "duration": 4,
+      "dependencies": ["backend_api"]
+    },
+    {
+      "id": "deployment",
+      "required_skills": ["devops"],
+      "priority": 6,
+      "duration": 1
+    }
+  ],
+  "constraints": {
+    "skill_match": true,
+    "capacity_limit": true,
+    "precedence": {
+      "ml_pipeline": ["backend_api"]
+    }
+  }
+}
