@@ -1,0 +1,11 @@
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.failure", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1754358031.071254}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.failure", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1754358079.3548143}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.failure", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1754358091.9024312}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.failure", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1754358114.3261616}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1754358351.4044945}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1754358361.7139}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1754358378.2735403}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.failure", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1754358435.4959946}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1754358536.4703214}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1754358724.9129953}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1754359064.0504165}
