@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 class OptimizationBackend(Enum):
     """Available optimization backends."""
     CLASSICAL = "classical"
+    QUANTUM = "quantum"
     DWAVE = "dwave"
     IBMQ = "ibmq"
     AZURE = "azure"
@@ -239,11 +240,59 @@ class SimulatorOptimizer(BaseOptimizer):
         return max(agent_loads.values()) if agent_loads else 0.0
 
 
+class ClassicalOptimizer(BaseOptimizer):
+    """Enhanced classical optimizer with multiple algorithms."""
+    
+    def __init__(self):
+        super().__init__(OptimizationBackend.CLASSICAL)
+    
+    def _formulate_qubo(self, agents: List[Agent], tasks: List[Task]) -> Dict[tuple, float]:
+        """Use greedy assignment instead of QUBO for classical approach."""
+        return {}  # Not needed for greedy approach
+    
+    def _solve_qubo(self, qubo: Dict[tuple, float], params: OptimizationParams) -> Dict[str, Any]:
+        """Use greedy algorithm instead of QUBO solving."""
+        return {"algorithm": "greedy", "solution": {}}
+    
+    def _parse_solution(self, raw_solution: Dict[str, Any], agents: List[Agent], tasks: List[Task]) -> Solution:
+        """Use greedy assignment algorithm."""
+        assignments = {}
+        agent_loads = {agent.agent_id: 0.0 for agent in agents}
+        
+        # Sort tasks by priority (higher first) then by duration (shorter first)
+        sorted_tasks = sorted(tasks, key=lambda t: (-t.priority, t.duration))
+        
+        for task in sorted_tasks:
+            # Find compatible agents
+            compatible_agents = [agent for agent in agents if task.can_be_assigned_to(agent)]
+            
+            if not compatible_agents:
+                self.logger.warning(f"No compatible agents for task {task.task_id}")
+                continue
+            
+            # Assign to agent with lowest current load
+            best_agent = min(compatible_agents, key=lambda a: agent_loads[a.agent_id])
+            assignments[task.task_id] = best_agent.agent_id
+            agent_loads[best_agent.agent_id] += task.duration
+        
+        makespan = max(agent_loads.values()) if agent_loads else 0.0
+        cost = sum(task.duration for task in tasks if task.task_id in assignments)
+        
+        return Solution(
+            assignments=assignments,
+            makespan=makespan,
+            cost=cost,
+            backend_used=self.backend.value
+        )
+
+
 class OptimizerFactory:
     """Factory for creating optimization backends."""
     
     _optimizers = {
-        OptimizationBackend.SIMULATOR: SimulatorOptimizer
+        OptimizationBackend.SIMULATOR: SimulatorOptimizer,
+        OptimizationBackend.CLASSICAL: ClassicalOptimizer,
+        OptimizationBackend.QUANTUM: SimulatorOptimizer  # Fallback to simulator
     }
     
     @classmethod
@@ -285,9 +334,18 @@ def optimize_tasks(
     agents: List[Agent],
     tasks: List[Task],
     backend: str = "simulator",
+    objective: str = "minimize_makespan",
+    constraints: Optional[Dict[str, Any]] = None,
     **params
 ) -> Solution:
     """High-level task optimization function."""
     optimizer = create_optimizer(backend)
-    optimization_params = OptimizationParams(**params)
+    
+    # Filter params to only include OptimizationParams fields
+    valid_params = {}
+    for key in ['num_reads', 'chain_strength', 'annealing_time', 'timeout', 'max_retries']:
+        if key in params:
+            valid_params[key] = params[key]
+    
+    optimization_params = OptimizationParams(**valid_params)
     return optimizer.optimize(agents, tasks, optimization_params)

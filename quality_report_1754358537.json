@@ -1,0 +1,89 @@
+{
+  "timestamp": 1754358537.1624768,
+  "system_info": {
+    "python_version": "3.12.3 (main, Jun 18 2025, 17:59:45) [GCC 13.3.0]",
+    "platform": "linux"
+  },
+  "test_results": {},
+  "performance_metrics": {
+    "optimization_enabled": true,
+    "caches": {
+      "solutions": {
+        "size": 10,
+        "max_size": 500,
+        "memory_usage_mb": 0.0031633377075195312,
+        "max_memory_mb": 100.0,
+        "hits": 4,
+        "misses": 10,
+        "hit_rate": 0.2857142857142857,
+        "memory_utilization": 3.1633377075195314e-05
+      },
+      "problem_analysis": {
+        "size": 10,
+        "max_size": 1000,
+        "memory_usage_mb": 0.001926422119140625,
+        "max_memory_mb": 100.0,
+        "hits": 1,
+        "misses": 10,
+        "hit_rate": 0.09090909090909091,
+        "memory_utilization": 1.926422119140625e-05
+      },
+      "backend_selection": {
+        "size": 0,
+        "max_size": 100,
+        "memory_usage_mb": 0.0,
+        "max_memory_mb": 100.0,
+        "hits": 0,
+        "misses": 0,
+        "hit_rate": 0,
+        "memory_utilization": 0.0
+      }
+    },
+    "thread_pools": {},
+    "memory_usage": {
+      "rss_mb": 35.8203125,
+      "vms_mb": 293.84765625,
+      "percent": 0.9086657180341904
+    },
+    "planner": {
+      "backend_name": "enhanceddwave",
+      "fallback_name": "enhancedsimulatedannealing",
+      "config": {
+        "backend": "auto",
+        "fallback": "simulated_annealing",
+        "fallback_threshold": 20
+      }
+    }
+  },
+  "security_status": {},
+  "recommendations": [
+    "System is performing well - maintain current practices"
+  ],
+  "system_health": {
+    "timestamp": 1754358537.2632213,
+    "overall_status": "healthy",
+    "components": {
+      "primary_backend": {
+        "status": "healthy",
+        "name": "enhanceddwave",
+        "available": true
+      },
+      "fallback_backend": {
+        "status": "healthy",
+        "name": "enhancedsimulatedannealing",
+        "available": true
+      }
+    },
+    "metrics": {
+      "error_rate": 0.0,
+      "total_errors": 0,
+      "performance": {}
+    },
+    "recent_errors": []
+  },
+  "error_statistics": {
+    "total_errors": 0,
+    "error_rate": 0.0
+  },
+  "quality_score": 93.75
+}
