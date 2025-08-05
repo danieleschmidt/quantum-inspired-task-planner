@@ -4,7 +4,7 @@ from typing import List, Any, Dict, Optional
 import logging
 
 from .base_integration import BaseIntegration, IntegrationConfig, IntegrationError
-from quantum_planner.models import Agent, Task, Solution
+from ..models import Agent, Task, Solution
 
 logger = logging.getLogger(__name__)
 

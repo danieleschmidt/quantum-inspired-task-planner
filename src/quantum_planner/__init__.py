@@ -11,6 +11,7 @@ from .optimizer import (
     create_optimizer,
     optimize_tasks
 )
+from .planner import QuantumTaskPlanner, PlannerConfig
 
 __all__ = [
     "Agent",
@@ -21,5 +22,7 @@ __all__ = [
     "OptimizationParams",
     "OptimizerFactory",
     "create_optimizer",
-    "optimize_tasks"
+    "optimize_tasks",
+    "QuantumTaskPlanner",
+    "PlannerConfig"
 ]

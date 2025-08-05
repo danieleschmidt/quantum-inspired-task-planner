@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import logging
 from enum import Enum
 
-from quantum_planner.models import Agent, Task, TimeWindowTask
+from .models import Agent, Task, TimeWindowTask
 
 logger = logging.getLogger(__name__)
 

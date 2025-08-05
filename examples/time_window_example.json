@@ -1,0 +1,51 @@
+{
+  "agents": [
+    {
+      "id": "agent1",
+      "skills": ["python"],
+      "capacity": 2
+    },
+    {
+      "id": "agent2",
+      "skills": ["devops"],
+      "capacity": 1
+    },
+    {
+      "id": "agent3",
+      "skills": ["python", "devops"],
+      "capacity": 1
+    }
+  ],
+  "tasks": [
+    {
+      "id": "urgent_fix",
+      "required_skills": ["python"],
+      "priority": 10,
+      "duration": 2,
+      "earliest_start": 0,
+      "latest_finish": 4
+    },
+    {
+      "id": "scheduled_maintenance",
+      "required_skills": ["devops"],
+      "priority": 5,
+      "duration": 3,
+      "earliest_start": 10,
+      "latest_finish": 15
+    },
+    {
+      "id": "code_review",
+      "required_skills": ["python"],
+      "priority": 7,
+      "duration": 1,
+      "earliest_start": 5,
+      "latest_finish": 12
+    }
+  ],
+  "constraints": {
+    "skill_match": true,
+    "capacity_limit": true,
+    "time_windows": true
+  },
+  "time_horizon": 20
+}
