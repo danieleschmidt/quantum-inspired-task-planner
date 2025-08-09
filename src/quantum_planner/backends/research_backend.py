@@ -18,6 +18,15 @@ from ..research.advanced_quantum_algorithms import (
 from ..research.hybrid_decomposition import (
     HybridQuantumClassicalSolver, HybridMode, DecompositionStrategy
 )
+from ..research.noise_aware_optimization import (
+    AdaptiveNoiseAwareOptimizer, NoiseAwareBackendWrapper, NoiseModelFactory
+)
+from ..research.realtime_quantum_adaptation import (
+    RealTimeAdaptationEngine, PerformanceMetrics, AdaptationTrigger
+)
+from ..research.quantum_pareto_optimization import (
+    MultiObjectiveQuantumOptimizer, MultiObjectiveProblem, MultiObjectiveSolution
+)
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +49,9 @@ class ResearchQuantumBackend(EnhancedQuantumBackend):
         default_config = {
             "preferred_algorithm": "adaptive_qaoa",
             "enable_hybrid_decomposition": True,
+            "enable_noise_aware_optimization": True,
+            "enable_realtime_adaptation": True,
+            "enable_multi_objective": True,
             "hybrid_mode": "adaptive",
             "decomposition_strategy": "spectral_clustering",
             "max_subproblem_size": 20,
@@ -48,7 +60,9 @@ class ResearchQuantumBackend(EnhancedQuantumBackend):
                 "initial_layers": 2,
                 "max_layers": 8,
                 "adaptation_threshold": 1e-4
-            }
+            },
+            "noise_profile": "auto_detect",
+            "adaptation_rate": 0.1
         }
         
         if config:
@@ -56,11 +70,63 @@ class ResearchQuantumBackend(EnhancedQuantumBackend):
         
         super().__init__("research_quantum", default_config)
         
-        # Initialize hybrid solver
+        # Initialize advanced research components
         self.hybrid_solver = HybridQuantumClassicalSolver()
+        
+        # Initialize noise-aware optimization
+        if self.config.get("enable_noise_aware_optimization", True):
+            noise_profile = self._initialize_noise_profile()
+            self.noise_aware_optimizer = AdaptiveNoiseAwareOptimizer(
+                noise_profile=noise_profile,
+                adaptation_rate=self.config.get("adaptation_rate", 0.1)
+            )
+            logger.info("✓ Noise-aware optimization enabled")
+        else:
+            self.noise_aware_optimizer = None
+        
+        # Initialize real-time adaptation
+        if self.config.get("enable_realtime_adaptation", True):
+            self.adaptation_engine = RealTimeAdaptationEngine(
+                adaptation_rate=self.config.get("adaptation_rate", 0.1)
+            )
+            logger.info("✓ Real-time adaptation enabled")
+        else:
+            self.adaptation_engine = None
+        
+        # Initialize multi-objective optimizer
+        if self.config.get("enable_multi_objective", True):
+            self.multi_objective_optimizer = MultiObjectiveQuantumOptimizer(
+                quantum_backend=self,
+                classical_fallback=True
+            )
+            logger.info("✓ Multi-objective optimization enabled")
+        else:
+            self.multi_objective_optimizer = None
         
         # Algorithm selection strategy
         self.algorithm_selection_enabled = True
+        
+        # Performance tracking
+        self.performance_history = []
+        
+        logger.info(f"Research backend initialized with advanced capabilities")
+    
+    def _initialize_noise_profile(self):
+        """Initialize noise profile based on configuration."""
+        noise_profile_config = self.config.get("noise_profile", "auto_detect")
+        
+        if noise_profile_config == "auto_detect":
+            # Auto-detect based on backend type
+            return NoiseModelFactory.create_ibm_noise_model("ibmq_qasm_simulator")
+        elif isinstance(noise_profile_config, str):
+            # Use predefined profile
+            if "ibm" in noise_profile_config.lower():
+                return NoiseModelFactory.create_ibm_noise_model(noise_profile_config)
+            elif "dwave" in noise_profile_config.lower():
+                return NoiseModelFactory.create_dwave_noise_model(noise_profile_config)
+        
+        # Default fallback
+        return NoiseModelFactory.create_ibm_noise_model()
     
     def get_capabilities(self) -> BackendCapabilities:
         """Get research backend capabilities."""
@@ -76,7 +142,7 @@ class ResearchQuantumBackend(EnhancedQuantumBackend):
         )
     
     def _solve_qubo(self, Q: Any, **kwargs) -> Dict[int, int]:
-        """Solve QUBO using advanced research algorithms."""
+        """Solve QUBO using advanced research algorithms with full integration."""
         
         start_time = time.time()
         
@@ -88,11 +154,181 @@ class ResearchQuantumBackend(EnhancedQuantumBackend):
         
         self.logger.info(f"Solving {problem_size}x{problem_size} QUBO with research backend")
         
+        # Create optimization context for adaptation
+        context = self._create_optimization_context(Q, **kwargs)
+        
+        # Check for multi-objective optimization
+        if self._is_multi_objective_problem(kwargs):
+            return self._solve_multi_objective(Q, context, **kwargs)
+        
+        # Apply real-time adaptation if enabled
+        if self.adaptation_engine:
+            adaptation = self.adaptation_engine.recommend_adaptation(
+                context, trigger=AdaptationTrigger.PERFORMANCE_DEGRADATION
+            )
+            if adaptation:
+                self.logger.info(f"Applying adaptation: {adaptation.action_type}")
+                # Apply adaptation to context/config
+                context = self._apply_adaptation_to_context(context, adaptation)
+        
+        # Apply noise-aware optimization if enabled
+        if self.noise_aware_optimizer:
+            # Wrap the solution process with noise-aware optimization
+            backend_info = {
+                'type': self.backend_name,
+                'noise_model': self.noise_aware_optimizer.noise_profile
+            }
+            
+            noise_aware_result = self.noise_aware_optimizer.optimize(Q, backend_info)
+            
+            # Track performance for adaptation
+            self._track_performance(context, noise_aware_result, start_time)
+            
+            return self._format_solution(noise_aware_result.get('best_solution', {}))
+        
         # Determine solution approach based on problem characteristics
         if self.config.get("enable_hybrid_decomposition", True) and problem_size > self.config.get("max_subproblem_size", 20):
-            return self._solve_with_hybrid_decomposition(Q, **kwargs)
+            result = self._solve_with_hybrid_decomposition(Q, **kwargs)
         else:
+            result = self._solve_with_quantum_algorithm(Q, **kwargs)
+        
+        # Track performance for adaptation
+        end_time = time.time()
+        self._track_performance(context, {'best_solution': result}, start_time, end_time)
+        
+        return result
+    
+    def _create_optimization_context(self, Q: np.ndarray, **kwargs) -> Dict[str, Any]:
+        """Create optimization context for adaptation."""
+        return {
+            'problem_size': Q.shape[0],
+            'noise_level': 0.05,  # Default estimate
+            'time_limit': kwargs.get('time_limit', 300),
+            'resource_limit': kwargs.get('resource_limit', 1.0),
+            'constraints': kwargs.get('constraints', []),
+            'current_algorithm': self.config.get('preferred_algorithm', 'adaptive_qaoa'),
+            'backend_load': 0.5,  # Default estimate
+            'iteration': kwargs.get('iteration', 0),
+            'temperature': kwargs.get('temperature', 1.0)
+        }
+    
+    def _is_multi_objective_problem(self, kwargs) -> bool:
+        """Check if this is a multi-objective optimization problem."""
+        return (
+            'objectives' in kwargs and len(kwargs['objectives']) > 1
+        ) or (
+            'multi_objective' in kwargs and kwargs['multi_objective']
+        )
+    
+    def _solve_multi_objective(self, Q: np.ndarray, context: Dict[str, Any], **kwargs) -> Dict[int, int]:
+        """Solve multi-objective problem using quantum Pareto optimization."""
+        if not self.multi_objective_optimizer:
+            self.logger.warning("Multi-objective optimization not enabled, falling back to single objective")
             return self._solve_with_quantum_algorithm(Q, **kwargs)
+        
+        # Create multi-objective problem from QUBO
+        problem = self._create_multi_objective_problem(Q, **kwargs)
+        
+        # Optimize
+        results = self.multi_objective_optimizer.optimize(
+            problem=problem,
+            algorithm='quantum_nsga2',
+            max_evaluations=kwargs.get('max_evaluations', 5000)
+        )
+        
+        # Extract best solution (e.g., first Pareto front solution)
+        pareto_front = results['pareto_front']
+        if pareto_front:
+            best_solution = pareto_front[0].solution
+            return self._format_solution({i: int(best_solution[i]) for i in range(len(best_solution))})
+        
+        # Fallback to single objective
+        return self._solve_with_quantum_algorithm(Q, **kwargs)
+    
+    def _create_multi_objective_problem(self, Q: np.ndarray, **kwargs) -> MultiObjectiveProblem:
+        """Create multi-objective problem from QUBO matrix."""
+        
+        def objective1(x):
+            return x @ Q @ x
+        
+        def objective2(x):
+            # Secondary objective (e.g., minimize number of active variables)
+            return np.sum(x)
+        
+        problem = MultiObjectiveProblem(
+            objective_functions=[objective1, objective2],
+            objective_names=['energy', 'sparsity'],
+            bounds=[(0, 1)] * Q.shape[0],
+            variable_types=['binary'] * Q.shape[0],
+            num_variables=Q.shape[0]
+        )
+        
+        return problem
+    
+    def _apply_adaptation_to_context(self, context: Dict[str, Any], adaptation) -> Dict[str, Any]:
+        """Apply adaptation action to optimization context."""
+        updated_context = context.copy()
+        
+        if adaptation.action_type == 'algorithm_switch':
+            updated_context['current_algorithm'] = adaptation.parameters.get('new_algorithm')
+        elif adaptation.action_type == 'parameter_tune':
+            param_name = adaptation.parameters.get('param_name')
+            new_value = adaptation.parameters.get('new_value')
+            updated_context[param_name] = new_value
+        elif adaptation.action_type == 'resource_reallocation':
+            factor = adaptation.parameters.get('factor', 1.0)
+            updated_context['resource_limit'] *= factor
+        
+        return updated_context
+    
+    def _track_performance(self, context: Dict[str, Any], result: Dict, start_time: float, end_time: float = None):
+        """Track performance for real-time adaptation."""
+        if not self.adaptation_engine:
+            return
+        
+        if end_time is None:
+            end_time = time.time()
+        
+        # Extract solution quality metrics
+        energy = result.get('best_energy', 0.0)
+        solution = result.get('best_solution', {})
+        
+        # Create performance metrics
+        metrics = PerformanceMetrics(
+            energy=abs(energy),
+            solution_quality=max(0.1, 1.0 / (1.0 + abs(energy))),  # Higher is better
+            convergence_rate=0.1,  # Default estimate
+            time_to_solution=end_time - start_time,
+            resource_utilization=context.get('resource_limit', 1.0),
+            noise_resilience=1.0 - context.get('noise_level', 0.05),
+            problem_size=context.get('problem_size', 0),
+            algorithm_used=context.get('current_algorithm', 'unknown'),
+            backend_type='research_quantum',
+            noise_level=context.get('noise_level', 0.05)
+        )
+        
+        # Observe performance
+        self.adaptation_engine.observe_performance(
+            context=context,
+            metrics=metrics,
+            action_taken=context.get('current_algorithm')
+        )
+        
+        # Store in history
+        self.performance_history.append({
+            'context': context,
+            'metrics': metrics,
+            'timestamp': end_time
+        })
+    
+    def _format_solution(self, solution: Dict) -> Dict[int, int]:
+        """Format solution to expected output format."""
+        if isinstance(solution, dict):
+            return {int(k): int(v) for k, v in solution.items()}
+        elif isinstance(solution, np.ndarray):
+            return {i: int(solution[i]) for i in range(len(solution))}
+        else:
+            return solution
     
     def _solve_with_hybrid_decomposition(self, Q: np.ndarray, **kwargs) -> Dict[int, int]:
         """Solve using hybrid quantum-classical decomposition."""

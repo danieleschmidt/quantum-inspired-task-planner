@@ -9,3 +9,5 @@
 {"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1754358536.4703214}
 {"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1754358724.9129953}
 {"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1754359064.0504165}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1754718237.0609024}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1754719054.8751807}
