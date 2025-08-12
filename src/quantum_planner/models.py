@@ -2,7 +2,15 @@
 
 from typing import Dict, List, Set, Any, Optional
 from dataclasses import dataclass, field
-from collections import Counter
+try:
+    from collections import Counter
+except ImportError:
+    class Counter(dict):
+        def __init__(self, iterable=None):
+            super().__init__()
+            if iterable:
+                for item in iterable:
+                    self[item] = self.get(item, 0) + 1
 
 
 @dataclass(frozen=True)
