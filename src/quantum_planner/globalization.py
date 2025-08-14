@@ -1,12 +1,13 @@
-"""Global-first implementation features: I18n, multi-region, compliance."""
+"""Global-first implementation with multi-region support, i18n, and compliance."""
 
 import os
 import json
+import time
 import logging
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Any, Optional, Union
 from dataclasses import dataclass, field
 from enum import Enum
-import time
+import hashlib
 from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
@@ -24,6 +25,16 @@ class Region(Enum):
 
 class Language(Enum):
     """Supported languages."""
+    EN = "en"
+    ES = "es"
+    FR = "fr"
+    DE = "de"
+    JA = "ja"
+    ZH = "zh"
+    PT = "pt"
+    RU = "ru"
+    
+    # Backward compatibility aliases
     ENGLISH = "en"
     SPANISH = "es"
     FRENCH = "fr"
@@ -74,15 +85,17 @@ class InternationalizationManager:
     
     def __init__(self):
         self.translations: Dict[str, Dict[str, str]] = {}
-        self.current_language = Language.ENGLISH
+        self.current_language = Language.EN
         self._load_translations()
     
     def _load_translations(self):
         """Load translation files."""
         # Default English translations
-        self.translations[Language.ENGLISH.value] = {
+        self.translations[Language.EN.value] = {
             'assignment_started': 'Task assignment started',
             'assignment_completed': 'Task assignment completed',
+            'optimization_started': 'Optimization started',
+            'optimization_completed': 'Optimization completed in {duration}',
             'optimization_backend': 'Optimization backend',
             'solution_found': 'Solution found',
             'no_solution': 'No feasible solution found',
@@ -106,9 +119,11 @@ class InternationalizationManager:
         }
         
         # Spanish translations
-        self.translations[Language.SPANISH.value] = {
+        self.translations[Language.ES.value] = {
             'assignment_started': 'Asignación de tareas iniciada',
             'assignment_completed': 'Asignación de tareas completada',
+            'optimization_started': 'Optimización iniciada',
+            'optimization_completed': 'Optimización completada en {duration}',
             'optimization_backend': 'Backend de optimización',
             'solution_found': 'Solución encontrada',
             'no_solution': 'No se encontró una solución factible',
@@ -132,9 +147,11 @@ class InternationalizationManager:
         }
         
         # French translations
-        self.translations[Language.FRENCH.value] = {
+        self.translations[Language.FR.value] = {
             'assignment_started': 'Attribution des tâches commencée',
             'assignment_completed': 'Attribution des tâches terminée',
+            'optimization_started': 'Optimisation commencée',
+            'optimization_completed': 'Optimisation terminée en {duration}',
             'optimization_backend': 'Backend d\'optimisation',
             'solution_found': 'Solution trouvée',
             'no_solution': 'Aucune solution réalisable trouvée',
@@ -158,9 +175,11 @@ class InternationalizationManager:
         }
         
         # German translations
-        self.translations[Language.GERMAN.value] = {
+        self.translations[Language.DE.value] = {
             'assignment_started': 'Aufgabenzuweisung gestartet',
             'assignment_completed': 'Aufgabenzuweisung abgeschlossen',
+            'optimization_started': 'Optimierung gestartet',
+            'optimization_completed': 'Optimierung abgeschlossen in {duration}',
             'optimization_backend': 'Optimierungs-Backend',
             'solution_found': 'Lösung gefunden',
             'no_solution': 'Keine durchführbare Lösung gefunden',
@@ -184,9 +203,11 @@ class InternationalizationManager:
         }
         
         # Japanese translations
-        self.translations[Language.JAPANESE.value] = {
+        self.translations[Language.JA.value] = {
             'assignment_started': 'タスク割り当てが開始されました',
             'assignment_completed': 'タスク割り当てが完了しました',
+            'optimization_started': '最適化が開始されました',
+            'optimization_completed': '{duration}で最適化が完了しました',
             'optimization_backend': '最適化バックエンド',
             'solution_found': '解決策が見つかりました',
             'no_solution': '実行可能な解決策が見つかりません',
@@ -207,6 +228,34 @@ class InternationalizationManager:
             'encryption_enabled': 'データ暗号化が有効になっています',
             'compliance_check': 'コンプライアンス検証が完了しました',
             'audit_log': '監査目的でアクションがログに記録されました',
+        }
+        
+        # Chinese translations
+        self.translations[Language.ZH.value] = {
+            'assignment_started': '任务分配已开始',
+            'assignment_completed': '任务分配已完成',
+            'optimization_started': '优化已开始',
+            'optimization_completed': '优化在{duration}内完成',
+            'optimization_backend': '优化后端',
+            'solution_found': '找到解决方案',
+            'no_solution': '未找到可行解决方案',
+            'skill_mismatch': '技能要求与可用代理不匹配',
+            'capacity_exceeded': '代理容量超出',
+            'invalid_input': '提供的输入无效',
+            'system_error': '系统错误发生',
+            'performance_warning': '检测到性能下降',
+            'cache_hit': '使用缓存解决方案',
+            'fallback_used': '使用备用后端',
+            'validation_failed': '解决方案验证失败',
+            'concurrent_limit': '达到并发操作限制',
+            'data_processed': '数据处理成功',
+            'privacy_notice': '您的数据根据我们的隐私政策进行处理',
+            'consent_required': '数据处理需要用户同意',
+            'data_retention': '数据将保留{days}天',
+            'cross_border_transfer': '数据可能在地区间传输',
+            'encryption_enabled': '数据加密已启用',
+            'compliance_check': '合规验证已完成',
+            'audit_log': '操作已记录用于审计目的',
         }
     
     def set_language(self, language: Language):
@@ -395,6 +444,10 @@ class GlobalizationManager:
         self.i18n = InternationalizationManager()
         self.compliance = ComplianceManager()
         self.current_user_context: Optional[UserContext] = None
+        self.current_region = Region.US_EAST  # Default region
+        self.current_language = Language.EN  # Default language
+        self.data_records: List[Dict[str, Any]] = []  # Track processed data
+        self.compliance_records: List[Dict[str, Any]] = []  # Track compliance records
     
     def set_user_context(self, user_context: UserContext):
         """Set current user context for operations."""
@@ -498,6 +551,248 @@ class GlobalizationManager:
             notice_parts.append(self.i18n.translate('cross_border_transfer'))
         
         return ' '.join(notice_parts)
+    
+    def set_region(self, region: Region) -> None:
+        """Set current region."""
+        self.current_region = region
+        logger.info(f"Region set to {region.value}")
+    
+    def set_language(self, language: Language) -> None:
+        """Set current language."""
+        self.current_language = language
+        self.i18n.set_language(language)
+        logger.info(f"Language set to {language.value}")
+    
+    def get_regional_config(self, region: Region) -> RegionalConfig:
+        """Get configuration for a specific region."""
+        return self.compliance.regional_configs.get(region, RegionalConfig(region=region))
+    
+    def get_quantum_backends_for_region(self, region: Region) -> List[str]:
+        """Get available quantum backends for a region."""
+        # Simulate quantum backend availability by region
+        backend_map = {
+            Region.US_EAST: ["ibm_quantum_us", "aws_braket_us_east"],
+            Region.US_WEST: ["google_quantum_us", "aws_braket_us_west"],
+            Region.EU_WEST: ["ibm_quantum_eu", "atos_quantum_eu"],
+            Region.EU_CENTRAL: ["cambridge_quantum_eu", "pasqal_eu"],
+            Region.ASIA_PACIFIC: ["rigetti_apac", "aws_braket_apac"],
+            Region.ASIA_NORTHEAST: ["ibm_quantum_jp", "ntt_quantum_jp"]
+        }
+        return backend_map.get(region, [])
+    
+    def get_message(self, key: str, **kwargs) -> str:
+        """Get localized message."""
+        return self.i18n.translate(key, **kwargs)
+    
+    def check_compliance_requirements(self, user_location: str, data_types: List[str]) -> Dict[str, Any]:
+        """Check compliance requirements for user location and data types."""
+        # Map location codes to regions and frameworks
+        location_mapping = {
+            "EU-DE": (Region.EU_WEST, [ComplianceFramework.GDPR]),
+            "EU-FR": (Region.EU_WEST, [ComplianceFramework.GDPR]),
+            "US-CA": (Region.US_WEST, [ComplianceFramework.CCPA]),
+            "US-NY": (Region.US_EAST, [ComplianceFramework.CCPA]),
+            "SG": (Region.ASIA_PACIFIC, [ComplianceFramework.PDPA]),
+            "JP": (Region.ASIA_NORTHEAST, [ComplianceFramework.PDPA])
+        }
+        
+        region, frameworks = location_mapping.get(user_location, (Region.US_EAST, []))
+        
+        # Check if personal data requires consent
+        consent_required = "personal_data" in data_types and any(
+            framework in [ComplianceFramework.GDPR, ComplianceFramework.PDPA] 
+            for framework in frameworks
+        )
+        
+        # Define user rights based on framework
+        user_rights = []
+        if ComplianceFramework.GDPR in frameworks:
+            user_rights = ["access", "deletion", "rectification", "portability", "restriction"]
+        elif ComplianceFramework.CCPA in frameworks:
+            user_rights = ["access", "deletion", "opt_out", "non_discrimination"]
+        elif ComplianceFramework.PDPA in frameworks:
+            user_rights = ["access", "correction", "deletion"]
+        
+        return {
+            "applicable_frameworks": [f.value for f in frameworks],
+            "consent_required": consent_required,
+            "user_rights": user_rights,
+            "data_residency_required": region in [Region.EU_WEST, Region.EU_CENTRAL, Region.ASIA_PACIFIC],
+            "encryption_required": True,
+            "region": region.value
+        }
+    
+    def process_data_with_compliance(
+        self, 
+        user_id: str, 
+        data: Dict[str, Any], 
+        purpose: str, 
+        user_location: str,
+        consent_given: bool = False
+    ) -> Dict[str, Any]:
+        """Process data with compliance requirements."""
+        # Check compliance requirements
+        requirements = self.check_compliance_requirements(user_location, list(data.keys()))
+        
+        if requirements["consent_required"] and not consent_given:
+            raise ValueError("User consent required for data processing")
+        
+        # Determine processing region based on data residency requirements
+        if requirements["data_residency_required"]:
+            if user_location.startswith("EU"):
+                processing_region = Region.EU_WEST
+            elif user_location == "SG":
+                processing_region = Region.ASIA_PACIFIC
+            elif user_location == "JP":
+                processing_region = Region.ASIA_NORTHEAST
+            else:
+                processing_region = self.current_region
+        else:
+            processing_region = self.current_region
+        
+        # Process data with encryption if required
+        processed_data = data.copy()
+        if requirements["encryption_required"] and "personal_data" in data:
+            # Simulate encryption
+            processed_data["personal_data_encrypted"] = hashlib.sha256(
+                str(data["personal_data"]).encode()
+            ).hexdigest()[:16]
+            del processed_data["personal_data"]
+        
+        # Record compliance event
+        compliance_record = {
+            "timestamp": time.time(),
+            "user_id": user_id,
+            "purpose": purpose,
+            "user_location": user_location,
+            "processing_region": processing_region.value,
+            "consent_given": consent_given,
+            "frameworks": requirements["applicable_frameworks"],
+            "data_types": list(data.keys())
+        }
+        self.compliance_records.append(compliance_record)
+        
+        # Record data processing
+        data_record = {
+            "user_id": user_id,
+            "timestamp": time.time(),
+            "data_types": list(data.keys()),
+            "region": processing_region.value,
+            "purpose": purpose
+        }
+        self.data_records.append(data_record)
+        
+        return {
+            "processed_data": processed_data,
+            "region": processing_region.value,
+            "compliance_frameworks": requirements["applicable_frameworks"],
+            "encryption_applied": requirements["encryption_required"]
+        }
+    
+    def get_user_data_report(self, user_id: str) -> Dict[str, Any]:
+        """Generate user data report for data access requests."""
+        user_records = [r for r in self.data_records if r["user_id"] == user_id]
+        user_compliance = [r for r in self.compliance_records if r["user_id"] == user_id]
+        
+        # Get user rights based on most recent compliance record
+        user_rights = []
+        if user_compliance:
+            latest_record = max(user_compliance, key=lambda x: x["timestamp"])
+            frameworks = latest_record["frameworks"]
+            if "gdpr" in frameworks:
+                user_rights = ["access", "deletion", "rectification", "portability"]
+            elif "ccpa" in frameworks:
+                user_rights = ["access", "deletion", "opt_out"]
+            elif "pdpa" in frameworks:
+                user_rights = ["access", "correction", "deletion"]
+        
+        return {
+            "user_id": user_id,
+            "report_generated_at": time.time(),
+            "total_records": len(user_records),
+            "data_processing_activities": [
+                {
+                    "timestamp": r["timestamp"],
+                    "purpose": r["purpose"],
+                    "data_types": r["data_types"],
+                    "region": r["region"]
+                }
+                for r in user_records
+            ],
+            "user_rights": user_rights,
+            "compliance_records": len(user_compliance)
+        }
+    
+    def delete_user_data(self, user_id: str, verification_token: str) -> Dict[str, Any]:
+        """Delete user data (right to be forgotten)."""
+        # Simple verification (in production, use proper token validation)
+        expected_token = hashlib.sha256(f"delete:{user_id}".encode()).hexdigest()[:16]
+        if verification_token != expected_token:
+            raise ValueError("Invalid verification token")
+        
+        # Count records before deletion
+        initial_data_records = len(self.data_records)
+        initial_compliance_records = len(self.compliance_records)
+        
+        # Remove user data records
+        self.data_records = [r for r in self.data_records if r["user_id"] != user_id]
+        self.compliance_records = [r for r in self.compliance_records if r["user_id"] != user_id]
+        
+        # Calculate deleted records
+        deleted_data = initial_data_records - len(self.data_records)
+        deleted_compliance = initial_compliance_records - len(self.compliance_records)
+        
+        return {
+            "user_id": user_id,
+            "deleted_at": time.time(),
+            "records_deleted": deleted_data + deleted_compliance,
+            "data_records_deleted": deleted_data,
+            "compliance_records_deleted": deleted_compliance,
+            "status": "completed"
+        }
+    
+    def get_compliance_dashboard(self) -> Dict[str, Any]:
+        """Get comprehensive compliance dashboard."""
+        # Calculate metrics
+        total_records = len(self.compliance_records)
+        unique_users = len(set(r["user_id"] for r in self.compliance_records))
+        active_regions = len(set(r["processing_region"] for r in self.compliance_records))
+        
+        # Calculate consent rate
+        consent_given = sum(1 for r in self.compliance_records if r["consent_given"])
+        consent_rate = consent_given / total_records if total_records > 0 else 1.0
+        
+        # Regional distribution
+        regional_dist = {}
+        for record in self.compliance_records:
+            region = record["processing_region"]
+            regional_dist[region] = regional_dist.get(region, 0) + 1
+        
+        # Framework distribution
+        framework_dist = {}
+        for record in self.compliance_records:
+            for framework in record["frameworks"]:
+                framework_dist[framework] = framework_dist.get(framework, 0) + 1
+        
+        return {
+            "overview": {
+                "total_compliance_records": total_records,
+                "unique_users": unique_users,
+                "active_regions": active_regions,
+                "report_generated_at": time.time()
+            },
+            "consent_metrics": {
+                "consent_rate": consent_rate,
+                "total_consents": consent_given,
+                "total_requests": total_records
+            },
+            "regional_distribution": regional_dist,
+            "framework_distribution": framework_dist,
+            "data_processing_summary": {
+                "total_data_records": len(self.data_records),
+                "active_users": len(set(r["user_id"] for r in self.data_records))
+            }
+        }
 
 
 # Global instance
@@ -507,11 +802,25 @@ globalization = GlobalizationManager()
 def with_globalization(func):
     """Decorator to add globalization context to functions."""
     def wrapper(*args, **kwargs):
-        # Validate operation if user context is set
-        if not globalization.validate_operation(func.__name__):
-            raise PermissionError(globalization.localized_message('consent_required'))
+        # Extract globalization parameters from kwargs
+        region = kwargs.pop('region', None)
+        language = kwargs.pop('language', None)
+        
+        # Store original state
+        original_region = globalization.current_region
+        original_language = globalization.current_language
         
         try:
+            # Set temporary globalization context if provided
+            if region:
+                globalization.set_region(region)
+            if language:
+                globalization.set_language(language)
+            
+            # Validate operation if user context is set
+            if not globalization.validate_operation(func.__name__):
+                raise PermissionError(globalization.localized_message('consent_required'))
+            
             result = func(*args, **kwargs)
             
             # Apply data protection to result if it's a dict
@@ -525,6 +834,11 @@ def with_globalization(func):
             localized_error = globalization.localized_message('system_error')
             logger.error(f"{localized_error}: {e}")
             raise
+        
+        finally:
+            # Restore original state
+            globalization.set_region(original_region)
+            globalization.set_language(original_language)
     
     return wrapper
 
