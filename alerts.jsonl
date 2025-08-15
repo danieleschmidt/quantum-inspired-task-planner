@@ -18,3 +18,13 @@
 {"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1755093187.5136547}
 {"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1755093331.5042686}
 {"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1755093418.1140335}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1755212359.4256964}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1755212372.6073349}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1755212561.635063}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1755212590.3676543}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1755212607.9010823}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1755212623.7187407}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1755212825.7091005}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1755212890.0594404}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1755212997.0159252}
+{"alert_name": "high_error_rate", "metric_name": "optimization.errors.success", "value": 1.0, "message": "High error rate detected", "severity": "critical", "timestamp": 1755213223.064803}
