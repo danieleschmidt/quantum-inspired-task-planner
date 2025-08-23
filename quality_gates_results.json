@@ -1,0 +1,12 @@
+{
+  "passed": 7,
+  "failed": 0,
+  "total": 7,
+  "success_rate": 1.0,
+  "quality_gate_passed": true,
+  "estimated_coverage": 100.0,
+  "coverage_gate_passed": true,
+  "reliability_gate_passed": true,
+  "overall_gate_passed": true,
+  "timestamp": 1755932272.0583448
+}
