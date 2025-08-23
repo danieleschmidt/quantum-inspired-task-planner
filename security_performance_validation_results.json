@@ -1,0 +1,95 @@
+{
+  "timestamp": 1755932374.2906077,
+  "security": {
+    "passed": 4,
+    "total": 5,
+    "gate_passed": true,
+    "results": [
+      {
+        "name": "Input Sanitization",
+        "passed": false,
+        "severity": "high",
+        "description": "Validates that malicious inputs are properly sanitized",
+        "remediation": "Implement strict input validation and sanitization"
+      },
+      {
+        "name": "Data Encryption",
+        "passed": true,
+        "severity": "high",
+        "description": "Tests encryption of sensitive data at rest and in transit",
+        "remediation": null
+      },
+      {
+        "name": "Access Control",
+        "passed": true,
+        "severity": "high",
+        "description": "Tests role-based access control implementation",
+        "remediation": null
+      },
+      {
+        "name": "Secure Communication",
+        "passed": true,
+        "severity": "medium",
+        "description": "Tests secure hashing and token generation",
+        "remediation": null
+      },
+      {
+        "name": "Dependency Security",
+        "passed": true,
+        "severity": "medium",
+        "description": "Scans dependencies for known security vulnerabilities",
+        "remediation": null
+      }
+    ]
+  },
+  "performance": {
+    "passed": 4,
+    "total": 5,
+    "gate_passed": true,
+    "avg_duration": 0.0036664662000021053,
+    "max_throughput": 680179.565367689,
+    "results": [
+      {
+        "name": "Response Time",
+        "passed": true,
+        "duration": 0.001154127000063454,
+        "throughput": 866.4557712842866,
+        "memory_usage": 0.0,
+        "requirement": "<500ms for 1000 variable problems"
+      },
+      {
+        "name": "Throughput",
+        "passed": true,
+        "duration": 0.011358707999988837,
+        "throughput": 8803.81818073836,
+        "memory_usage": 0.0,
+        "requirement": ">=50.0 ops/sec"
+      },
+      {
+        "name": "Concurrent Performance",
+        "passed": true,
+        "duration": 0.005640340000013566,
+        "throughput": 17729.42765857368,
+        "memory_usage": 0.0,
+        "requirement": ">=50.0 ops/sec with 4 workers"
+      },
+      {
+        "name": "Memory Usage",
+        "passed": false,
+        "duration": 0.0,
+        "throughput": 0.0,
+        "memory_usage": 1.998,
+        "requirement": "<100.0MB memory usage"
+      },
+      {
+        "name": "Scalability",
+        "passed": true,
+        "duration": 0.00017915599994466902,
+        "throughput": 680179.565367689,
+        "memory_usage": 0.0,
+        "requirement": "Linear scaling, <1s for 200 variable problems"
+      }
+    ]
+  },
+  "overall_passed": true
+}
