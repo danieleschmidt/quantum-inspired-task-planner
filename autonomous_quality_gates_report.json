@@ -1,0 +1,95 @@
+{
+  "timestamp": "2025-08-24T04:23:52.859859",
+  "execution_time": 0.31,
+  "overall_score": 101.67,
+  "overall_status": "PASSED",
+  "gates_summary": {
+    "total_gates": 6,
+    "passed_gates": 6,
+    "failed_gates": 0
+  },
+  "detailed_results": [
+    {
+      "gate_name": "functionality_validation",
+      "passed": true,
+      "score": 100,
+      "execution_time": 0.2739274501800537,
+      "details": {
+        "basic_functionality": true,
+        "error_handling": true,
+        "average_solve_time": 0.0003,
+        "performance_acceptable": true
+      },
+      "error_message": null
+    },
+    {
+      "gate_name": "security_scanning",
+      "passed": true,
+      "score": 100,
+      "execution_time": 7.867813110351562e-06,
+      "details": {
+        "sensitive_files_clean": true,
+        "input_validation_score": 25,
+        "dependency_security_score": 25,
+        "code_security_score": 25
+      },
+      "error_message": null
+    },
+    {
+      "gate_name": "performance_benchmarking",
+      "passed": true,
+      "score": 100,
+      "execution_time": 0.031072139739990234,
+      "details": {
+        "small_problem_avg_time": 0.0005,
+        "medium_problem_avg_time": 0.0026,
+        "memory_usage_mb": 34.51,
+        "scalability_score": 20
+      },
+      "error_message": null
+    },
+    {
+      "gate_name": "test_coverage_validation",
+      "passed": true,
+      "score": 100.0,
+      "execution_time": 0.0004932880401611328,
+      "details": {
+        "test_files_present": 3,
+        "total_test_files": 3,
+        "core_modules_importable": true,
+        "error_handling_tests": 3,
+        "integration_tests_score": 25
+      },
+      "error_message": null
+    },
+    {
+      "gate_name": "code_quality_analysis",
+      "passed": true,
+      "score": 110.0,
+      "execution_time": 5.602836608886719e-05,
+      "details": {
+        "documentation_files": 3,
+        "src_structure_score": 35,
+        "config_files_score": 10,
+        "error_handling_patterns": 25,
+        "modern_python_score": 20
+      },
+      "error_message": null
+    },
+    {
+      "gate_name": "production_readiness",
+      "passed": true,
+      "score": 100,
+      "execution_time": 3.337860107421875e-05,
+      "details": {
+        "configuration_management": true,
+        "logging_implemented": true,
+        "error_recovery_mechanisms": true,
+        "monitoring_capabilities": true,
+        "scalability_features": true,
+        "security_measures": true
+      },
+      "error_message": null
+    }
+  ]
+}
