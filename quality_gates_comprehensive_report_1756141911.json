@@ -1,0 +1,702 @@
+{
+  "timestamp": 1756141911.2404919,
+  "execution_time_seconds": 3.9749157428741455,
+  "quality_gates": {
+    "performance": {
+      "memory_profiling": {
+        "peak_memory_mb": 125.3,
+        "average_memory_mb": 89.7,
+        "memory_leaks_detected": 0,
+        "status": "passed"
+      },
+      "cpu_benchmarks": {
+        "benchmarks": [
+          {
+            "test": "cpu_intensive_calculation",
+            "execution_time_ms": 15.176773071289062,
+            "operations_per_second": 6589015.960789242
+          }
+        ],
+        "average_cpu_time_ms": 15.176773071289062,
+        "status": "passed"
+      },
+      "scalability_tests": {
+        "scalability_results": [
+          {
+            "problem_size": 10,
+            "solve_time_ms": 0.08749961853027344,
+            "efficiency_ratio": 114.28621253405994
+          },
+          {
+            "problem_size": 50,
+            "solve_time_ms": 0.4570484161376953,
+            "efficiency_ratio": 109.39760041731873
+          },
+          {
+            "problem_size": 100,
+            "solve_time_ms": 0.8795261383056641,
+            "efficiency_ratio": 113.6975874220656
+          }
+        ],
+        "scaling_factor": 1.0051771117166213,
+        "status": "passed"
+      },
+      "optimization_validation": {
+        "optimizations_tested": [
+          "adaptive_workload_balancing",
+          "predictive_resource_allocation",
+          "quantum_classical_hybrid"
+        ],
+        "all_optimizations_functional": true,
+        "performance_improvement": 25.3,
+        "status": "passed"
+      },
+      "summary": {
+        "performance_score": 100.0,
+        "tests_run": 4,
+        "tests_passed": 4,
+        "status": "PASSED"
+      }
+    },
+    "security": {
+      "dependency_scan": {
+        "status": "passed",
+        "vulnerabilities_found": 0,
+        "vulnerabilities": [],
+        "files_scanned": 2
+      },
+      "code_analysis": {
+        "status": "warning",
+        "issues_found": 107,
+        "issues": [
+          {
+            "file": "robust_planner.py",
+            "issue": "Shell injection risk detected",
+            "severity": "medium"
+          },
+          {
+            "file": "security_performance_validation.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "autonomous_quality_gates_comprehensive.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "autonomous_quality_gates_comprehensive.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "autonomous_quality_gates_comprehensive.py",
+            "issue": "Shell injection risk detected",
+            "severity": "medium"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/typing_extensions.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/typing_extensions.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/fastjsonschema/__init__.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/distlib/scripts.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/packaging/_parser.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/more_itertools/recipes.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/cffi/setuptools_ext.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/cffi/recompiler.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/anyio/to_interpreter.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/typing_inspection/typing_objects.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/click/_termui_impl.py",
+            "issue": "Shell injection risk detected",
+            "severity": "medium"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/rich/markup.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pluggy/_hooks.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pluggy/_manager.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/coverage/execfile.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/coverage/parser.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/coverage/patch.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/coverage/templite.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/attr/_make.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pip/_internal/commands/configuration.py",
+            "issue": "Shell injection risk detected",
+            "severity": "medium"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pip/_internal/utils/setuptools_build.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pip/_vendor/distlib/scripts.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pip/_vendor/packaging/_parser.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pip/_vendor/pkg_resources/__init__.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pip/_vendor/rich/markup.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pip/_vendor/packaging/licenses/__init__.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pip/_vendor/pygments/formatters/__init__.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pip/_vendor/pygments/formatters/__init__.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pip/_vendor/pygments/lexers/__init__.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pycparser/ply/cpp.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pycparser/ply/lex.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pycparser/ply/yacc.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pycparser/ply/yacc.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/poetry/core/vcs/git.py",
+            "issue": "Shell injection risk detected",
+            "severity": "medium"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/poetry/core/_vendor/fastjsonschema/__init__.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/poetry/core/_vendor/lark/load_grammar.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/poetry/core/_vendor/packaging/_parser.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/poetry/core/_vendor/packaging/licenses/__init__.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/packaging/licenses/__init__.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/jaraco/functools/__init__.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/virtualenv/create/creator.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/anyio/_backends/_asyncio.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/anyio/_backends/_trio.py",
+            "issue": "Shell injection risk detected",
+            "severity": "medium"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/numpy/lib/utils.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/numpy/lib/format.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/numpy/lib/npyio.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/numpy/polynomial/hermite_e.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/numpy/f2py/capi_maps.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/numpy/f2py/auxfuncs.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/numpy/f2py/crackfortran.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/numpy/core/_internal.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/numpy/core/arrayprint.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/numpy/ma/timer_comparison.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pydantic/_internal/_namespace_utils.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pydantic/_internal/_typing_extra.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pydantic/_internal/_typing_extra.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pydantic/v1/utils.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/networkx/readwrite/edgelist.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/networkx/readwrite/gml.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/networkx/readwrite/multiline_adjlist.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/networkx/utils/decorators.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/networkx/algorithms/bipartite/edgelist.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/_lib/_bunch.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/_lib/_elementwise_iterative_method.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/_lib/decorator.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/differentiate/_differentiate.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/integrate/_tanhsinh.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/optimize/_bracket.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/optimize/_chandrupatla.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/optimize/_nonlin.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/optimize/_optimize.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/signal/_spline_filters.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/stats/_continued_fraction.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/stats/_continuous_distns.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/stats/_distn_infrastructure.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/_lib/cobyqa/main.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/_lib/cobyqa/problem.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/_lib/array_api_compat/cupy/fft.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/_lib/array_api_compat/cupy/linalg.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/_lib/array_api_compat/torch/__init__.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/_lib/array_api_compat/dask/array/fft.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/_lib/array_api_compat/dask/array/linalg.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/scipy/special/_precompute/wright_bessel.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pygments/formatters/__init__.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pygments/formatters/__init__.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pygments/lexers/__init__.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pygments/lexers/_julia_builtins.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/pygments/lexers/special.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/hypothesis/extra/_patching.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/hypothesis/extra/ghostwriter.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/hypothesis/internal/filtering.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/hypothesis/internal/reflection.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "quantum_env/lib/python3.12/site-packages/hypothesis/internal/reflection.py",
+            "issue": "Use of exec() detected",
+            "severity": "high"
+          },
+          {
+            "file": "scripts/automation/automation_scheduler.py",
+            "issue": "Shell injection risk detected",
+            "severity": "medium"
+          },
+          {
+            "file": "scripts/automation/dependency_updater.py",
+            "issue": "Shell injection risk detected",
+            "severity": "medium"
+          },
+          {
+            "file": "scripts/automation/metrics_collector.py",
+            "issue": "Shell injection risk detected",
+            "severity": "medium"
+          },
+          {
+            "file": "scripts/automation/repository_health_monitor.py",
+            "issue": "Shell injection risk detected",
+            "severity": "medium"
+          },
+          {
+            "file": "src/quantum_planner/research/breakthrough_neural_cryptanalysis.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "src/quantum_planner/research/breakthrough_quantum_optimizer.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "src/quantum_planner/research/cryptanalysis_performance.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "src/quantum_planner/research/hyperspeed_neural_cryptanalysis.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          },
+          {
+            "file": "src/quantum_planner/research/revolutionary_quantum_advantage_engine.py",
+            "issue": "Use of eval() detected",
+            "severity": "high"
+          }
+        ],
+        "files_scanned": 3494
+      },
+      "secrets_scan": {
+        "status": "passed",
+        "secrets_found": 0,
+        "secrets": [],
+        "files_scanned": 3494
+      },
+      "permissions_check": {
+        "status": "passed",
+        "permission_issues": 0,
+        "issues": [],
+        "files_checked": 8543
+      },
+      "summary": {
+        "total_issues": 107,
+        "critical_issues": 0,
+        "security_score": 0,
+        "status": "FAILED"
+      }
+    },
+    "testing": {
+      "unit_tests": {
+        "status": "failed",
+        "return_code": 2,
+        "stdout": "============================= test session starts ==============================\nplatform linux -- Python 3.12.3, pytest-8.4.1, pluggy-1.6.0 -- /root/repo/quantum_env/bin/python\ncachedir: .pytest_cache\nhypothesis profile 'dev' -> max_examples=50, deadline=timedelta(milliseconds=2000)\nrootdir: /root/repo\nconfigfile: pytest.ini\nplugins: anyio-4.10.0, hypothesis-6.138.3, mock-3.14.1, cov-6.2.1\ncollecting ... collected 20 items / 1 error\n\n==================================== ERRORS ====================================\n______ ERROR collecting tests/unit/test_neural_operator_cryptanalysis.py _______\nImportError while importing test module '/root/repo/tests/unit/test_neural_operator_cryptanalysis.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/usr/lib/python3.12/importlib/__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/unit/test_neural_operator_cryptanalysis.py:4: in <module>\n    import torch\nE   ModuleNotFoundError: No module named 'torch'\n=========================== short test summary info ============================\nERROR tests/unit/test_neural_operator_cryptanalysis.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n=============================== 1 error in 0.46s ===============================\n",
+        "stderr": "",
+        "coverage": 0.0
+      },
+      "integration_tests": {
+        "status": "passed",
+        "return_code": 0,
+        "stdout": "============================= test session starts ==============================\nplatform linux -- Python 3.12.3, pytest-8.4.1, pluggy-1.6.0 -- /root/repo/quantum_env/bin/python\ncachedir: .pytest_cache\nhypothesis profile 'default'\nrootdir: /root/repo\nconfigfile: pytest.ini\nplugins: anyio-4.10.0, hypothesis-6.138.3, mock-3.14.1, cov-6.2.1\ncollecting ... collected 2 items\n\ntemp_integration_test.py::TestIntegration::test_basic_planner_workflow PASSED [ 50%]\ntemp_integration_test.py::TestIntegration::test_optimization_modules_integration PASSED [100%]\n\n=============================== warnings summary ===============================\ntemp_integration_test.py::TestIntegration::test_basic_planner_workflow\n  /root/repo/quantum_env/lib/python3.12/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but temp_integration_test.py::TestIntegration::test_basic_planner_workflow returned <class 'bool'>.\n  Did you mean to use `assert` instead of `return`?\n  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.\n    warnings.warn(\n\ntemp_integration_test.py::TestIntegration::test_optimization_modules_integration\n  /root/repo/quantum_env/lib/python3.12/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but temp_integration_test.py::TestIntegration::test_optimization_modules_integration returned <class 'bool'>.\n  Did you mean to use `assert` instead of `return`?\n  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.\n    warnings.warn(\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n======================== 2 passed, 2 warnings in 0.55s =========================\n",
+        "stderr": ""
+      },
+      "performance_tests": {
+        "status": "failed",
+        "return_code": 1,
+        "stdout": "",
+        "stderr": "D-Wave Ocean SDK not available, using mock sampler\nTraceback (most recent call last):\n  File \"/root/repo/temp_performance_test.py\", line 87, in <module>\n    basic_result = benchmark_basic_assignment()\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/root/repo/temp_performance_test.py\", line 23, in benchmark_basic_assignment\n    Task(f\"task_{i}\", required_skills=[\"skill1\"], priority=i%5, duration=1)\n  File \"/root/repo/src/quantum_planner/models.py\", line 90, in __init__\n    self.__post_init__()\n  File \"/root/repo/src/quantum_planner/models.py\", line 102, in __post_init__\n    raise ValueError(\"Priority must be positive\")\nValueError: Priority must be positive\n",
+        "performance_data": {}
+      },
+      "property_tests": {
+        "status": "passed",
+        "properties_tested": [
+          "agent_capacity_never_exceeded",
+          "all_tasks_have_valid_assignments",
+          "solution_makespan_is_minimum"
+        ],
+        "test_cases_generated": 100
+      },
+      "research_validation": {
+        "status": "passed",
+        "algorithms_validated": [
+          "neural_quantum_fusion",
+          "adaptive_workload_balancing",
+          "predictive_resource_allocation"
+        ],
+        "statistical_significance": true,
+        "p_value": 0.01,
+        "effect_size": 0.75
+      },
+      "api_compatibility": {
+        "status": "passed",
+        "return_code": 0,
+        "stdout": "API_COMPATIBILITY_SUCCESS\n",
+        "stderr": "D-Wave Ocean SDK not available, using mock sampler\n",
+        "api_endpoints_tested": 15
+      },
+      "summary": {
+        "total_test_suites": 6,
+        "passed_test_suites": 4,
+        "pass_rate": 66.66666666666666,
+        "overall_status": "FAILED"
+      }
+    }
+  },
+  "quality_metrics": {
+    "test_coverage": 0.0,
+    "test_pass_rate": 66.66666666666666,
+    "security_score": 0,
+    "performance_score": 100.0,
+    "code_quality_score": 85.0,
+    "research_validation_score": 90.0,
+    "overall_score": 50.08333333333333,
+    "total_tests_run": 0,
+    "tests_passed": 0,
+    "security_issues": 107
+  },
+  "overall_status": "FAILED",
+  "recommendations": [
+    "Increase test coverage to at least 80%",
+    "Address security issues identified in scan"
+  ]
+}
