@@ -1,0 +1,233 @@
+{
+  "generation": 3,
+  "optimized": true,
+  "test_results": [
+    [
+      "Basic Optimized Assignment",
+      {
+        "assignments": {},
+        "metrics": {
+          "makespan": 0.0,
+          "total_cost": 0.0,
+          "assignment_rate": 0.0,
+          "load_balance": 0.0,
+          "cache_hit_rate": 0.0,
+          "cache_size": 0,
+          "parallel_efficiency": 0.0,
+          "optimization_iterations": 1,
+          "scaling_factor": 0.057999999999999996,
+          "throughput": 0.0
+        },
+        "solve_time": 0.0004036426544189453,
+        "backend_used": "simulated_annealing",
+        "success": true,
+        "generation": 3,
+        "session_id": "41e260f7b48bd8f7",
+        "optimization_score": -1,
+        "scaling_strategy": {
+          "category": "small",
+          "complexity_score": 5.8,
+          "use_parallel": false,
+          "use_caching": true,
+          "batch_size": 3,
+          "max_workers": 1,
+          "optimization_iterations": 1,
+          "memory_optimization": false
+        },
+        "cache_stats": {
+          "size": 0,
+          "max_size": 2000,
+          "hit_rate": 0.0,
+          "hits": 0,
+          "misses": 1,
+          "evictions": 0,
+          "invalidations": 0
+        },
+        "from_cache": false,
+        "session_uptime": 0.0008792877197265625,
+        "operation_count": 1,
+        "timestamp": 1756348866.3134053
+      }
+    ],
+    [
+      "Large Scale Parallel",
+      {
+        "assignments": {},
+        "metrics": {
+          "makespan": 0.0,
+          "total_cost": 0.0,
+          "assignment_rate": 0.0,
+          "load_balance": 0.0,
+          "cache_hit_rate": 0.3333333333333333,
+          "cache_size": 1,
+          "parallel_efficiency": 2.0,
+          "optimization_iterations": 2,
+          "scaling_factor": 8.032,
+          "throughput": 0.0
+        },
+        "solve_time": 0.44233131408691406,
+        "backend_used": "simulated_annealing",
+        "success": true,
+        "generation": 3,
+        "session_id": "41e260f7b48bd8f7",
+        "optimization_score": 0.0,
+        "scaling_strategy": {
+          "category": "medium",
+          "complexity_score": 803.1999999999999,
+          "use_parallel": true,
+          "use_caching": true,
+          "batch_size": 10,
+          "max_workers": 2,
+          "optimization_iterations": 2,
+          "memory_optimization": false
+        },
+        "cache_stats": {
+          "size": 1,
+          "max_size": 2000,
+          "hit_rate": 0.3333333333333333,
+          "hits": 1,
+          "misses": 2,
+          "evictions": 0,
+          "invalidations": 0
+        },
+        "from_cache": false,
+        "session_uptime": 0.4438004493713379,
+        "operation_count": 3,
+        "timestamp": 1756348866.7563264
+      }
+    ],
+    [
+      "Auto-Scaling Stress Test",
+      {
+        "assignments": {},
+        "metrics": {
+          "makespan": 0.0,
+          "total_cost": 0.0,
+          "assignment_rate": 0.0,
+          "load_balance": 0.0,
+          "cache_hit_rate": 0.25,
+          "cache_size": 2,
+          "parallel_efficiency": 3.2,
+          "optimization_iterations": 3,
+          "scaling_factor": 400.04400000000004,
+          "throughput": 0.0
+        },
+        "solve_time": 31.888217210769653,
+        "backend_used": "simulated_annealing",
+        "success": true,
+        "generation": 3,
+        "session_id": "41e260f7b48bd8f7",
+        "optimization_score": 0.0,
+        "scaling_strategy": {
+          "category": "large",
+          "complexity_score": 40004.4,
+          "use_parallel": true,
+          "use_caching": true,
+          "batch_size": 50,
+          "max_workers": 4,
+          "optimization_iterations": 3,
+          "memory_optimization": false
+        },
+        "cache_stats": {
+          "size": 2,
+          "max_size": 2000,
+          "hit_rate": 0.25,
+          "hits": 1,
+          "misses": 3,
+          "evictions": 0,
+          "invalidations": 0
+        },
+        "from_cache": false,
+        "session_uptime": 32.33684825897217,
+        "operation_count": 4,
+        "timestamp": 1756348898.6493742
+      }
+    ],
+    [
+      "Advanced Cost Optimization",
+      {
+        "assignments": {},
+        "metrics": {
+          "makespan": 0.0,
+          "total_cost": 0.0,
+          "assignment_rate": 0.0,
+          "load_balance": 0.0,
+          "cache_hit_rate": 0.2,
+          "cache_size": 3,
+          "parallel_efficiency": 800.0,
+          "optimization_iterations": 1,
+          "scaling_factor": 0.08800000000000001,
+          "throughput": 0.0
+        },
+        "solve_time": 0.0004706382751464844,
+        "backend_used": "simulated_annealing",
+        "success": true,
+        "generation": 3,
+        "session_id": "41e260f7b48bd8f7",
+        "optimization_score": -1,
+        "scaling_strategy": {
+          "category": "small",
+          "complexity_score": 8.8,
+          "use_parallel": false,
+          "use_caching": true,
+          "batch_size": 4,
+          "max_workers": 1,
+          "optimization_iterations": 1,
+          "memory_optimization": false
+        },
+        "cache_stats": {
+          "size": 3,
+          "max_size": 2000,
+          "hit_rate": 0.2,
+          "hits": 1,
+          "misses": 4,
+          "evictions": 0,
+          "invalidations": 0
+        },
+        "from_cache": false,
+        "session_uptime": 32.33759021759033,
+        "operation_count": 5,
+        "timestamp": 1756348898.6501162
+      }
+    ]
+  ],
+  "performance_summary": {
+    "session_id": "41e260f7b48bd8f7",
+    "uptime": 32.34101724624634,
+    "operations_completed": 10,
+    "operations_per_second": 0.3092048689705532,
+    "cache_stats": {
+      "size": 9,
+      "max_size": 2000,
+      "hit_rate": 0.1,
+      "hits": 1,
+      "misses": 9,
+      "evictions": 0,
+      "invalidations": 0
+    },
+    "parallel_stats": {
+      "parallel_runs": 5,
+      "sequential_runs": 0,
+      "parallel_ratio": 1.0
+    },
+    "performance_metrics": {
+      "total_solve_time": 32.33429718017578,
+      "cache_hits": 1,
+      "cache_misses": 9,
+      "parallel_tasks": 3200,
+      "optimization_iterations": 1
+    },
+    "scaling_history": 9
+  },
+  "benchmark_results": {
+    "total_solve_time": 32.33142280578613,
+    "average_throughput": 0.0,
+    "successful_operations": 4,
+    "tests_passed": 5,
+    "cache_performance": {
+      "hit_rate": 0.1,
+      "speedup_achieved": 1.1216105176663929
+    }
+  },
+  "timestamp": 1756348898.6536272
+}

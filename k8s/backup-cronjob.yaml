@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: quantum-planner-backup
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backup
+            image: postgres:15-alpine
+            command:
+            - /bin/sh
+            - -c
+            - |
+              pg_dump -h $POSTGRES_HOST -U $POSTGRES_USER quantum_planner | gzip > /backup/quantum_planner_$(date +%Y%m%d_%H%M%S).sql.gz
+            env:
+            - name: POSTGRES_HOST
+              value: postgres-service
+            - name: POSTGRES_USER
+              value: qp_user
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: quantum-planner-secrets
+                  key: database-password
+            volumeMounts:
+            - name: backup-volume
+              mountPath: /backup
+          volumes:
+          - name: backup-volume
+            persistentVolumeClaim:
+              claimName: backup-pvc
+          restartPolicy: OnFailure

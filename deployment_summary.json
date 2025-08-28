@@ -1,0 +1,30 @@
+{
+  "deployment_ready": true,
+  "overall_score": 100.0,
+  "timestamp": 1756349359.1523361,
+  "categories": {
+    "infrastructure": 100.0,
+    "application": 100.0,
+    "security": 100.0,
+    "monitoring": 100.0,
+    "operations": 100.0
+  },
+  "infrastructure": {
+    "container_platform": "Kubernetes",
+    "database": "PostgreSQL",
+    "cache": "Redis",
+    "load_balancer": "Nginx",
+    "ssl_termination": "Let's Encrypt",
+    "scaling": "Horizontal Pod Autoscaler"
+  },
+  "monitoring_setup": {
+    "metrics_collection": "Prometheus",
+    "log_aggregation": "ELK Stack",
+    "dashboards": "Grafana",
+    "alerting": "Alertmanager",
+    "health_checks": "Custom endpoints",
+    "uptime_monitoring": "External service"
+  },
+  "component_count": 17,
+  "operational_procedures": 10
+}

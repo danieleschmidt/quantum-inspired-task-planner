@@ -1,181 +1,48 @@
 {
   "dashboard": {
-    "id": null,
-    "title": "Quantum Task Planner Performance Dashboard",
-    "description": "Comprehensive monitoring for quantum-classical hybrid task scheduling",
-    "tags": ["quantum", "optimization", "performance"],
-    "timezone": "browser",
+    "title": "Quantum Planner Metrics",
+    "tags": ["quantum", "planner"],
     "panels": [
       {
-        "id": 1,
-        "title": "Solve Time Distribution",
-        "type": "stat",
+        "title": "Request Rate",
+        "type": "graph",
         "targets": [
           {
-            "expr": "histogram_quantile(0.95, rate(quantum_planner_solve_duration_seconds_bucket[5m]))",
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{method}} {{status}}"
+          }
+        ]
+      },
+      {
+        "title": "Response Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
             "legendFormat": "95th percentile"
-          },
-          {
-            "expr": "histogram_quantile(0.50, rate(quantum_planner_solve_duration_seconds_bucket[5m]))",
-            "legendFormat": "median"
           }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "s",
-            "thresholds": {
-              "steps": [
-                {"color": "green", "value": null},
-                {"color": "yellow", "value": 10},
-                {"color": "red", "value": 30}
-              ]
-            }
-          }
-        },
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+        ]
       },
       {
-        "id": 2,
-        "title": "Backend Performance Comparison",
-        "type": "timeseries",
-        "targets": [
-          {
-            "expr": "rate(quantum_planner_solve_duration_seconds_sum[5m]) / rate(quantum_planner_solve_duration_seconds_count[5m])",
-            "legendFormat": "{{backend}}"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "s",
-            "custom": {
-              "drawStyle": "line",
-              "lineInterpolation": "linear",
-              "pointSize": 3
-            }
-          }
-        },
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
-      },
-      {
-        "id": 3,
-        "title": "Memory Usage",
-        "type": "timeseries",
-        "targets": [
-          {
-            "expr": "quantum_planner_memory_usage_bytes",
-            "legendFormat": "Memory Usage"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "bytes",
-            "color": {"mode": "palette-classic"}
-          }
-        },
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
-      },
-      {
-        "id": 4,
-        "title": "Solution Quality Metrics",
+        "title": "Task Assignment Success Rate",
         "type": "stat",
         "targets": [
           {
-            "expr": "quantum_planner_solution_optimality_gap",
-            "legendFormat": "Optimality Gap"
-          },
-          {
-            "expr": "quantum_planner_makespan_ratio",
-            "legendFormat": "Makespan Efficiency"
+            "expr": "rate(task_assignments_successful_total[5m]) / rate(task_assignments_total[5m])",
+            "legendFormat": "Success Rate"
           }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "percent",
-            "thresholds": {
-              "steps": [
-                {"color": "red", "value": null},
-                {"color": "yellow", "value": 80},
-                {"color": "green", "value": 95}
-              ]
-            }
-          }
-        },
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+        ]
       },
       {
-        "id": 5,
-        "title": "Quantum Backend Status",
-        "type": "table",
+        "title": "Cache Hit Rate",
+        "type": "stat",
         "targets": [
           {
-            "expr": "quantum_planner_backend_availability",
-            "legendFormat": "{{backend}}",
-            "format": "table"
+            "expr": "rate(cache_hits_total[5m]) / rate(cache_requests_total[5m])",
+            "legendFormat": "Hit Rate"
           }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "custom": {
-              "displayMode": "basic"
-            },
-            "mappings": [
-              {
-                "options": {
-                  "0": {"text": "Offline", "color": "red"},
-                  "1": {"text": "Online", "color": "green"}
-                },
-                "type": "value"
-              }
-            ]
-          }
-        },
-        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16}
-      },
-      {
-        "id": 6,
-        "title": "Problem Size Distribution",
-        "type": "histogram",
-        "targets": [
-          {
-            "expr": "quantum_planner_problem_size_agents",
-            "legendFormat": "Agents"
-          },
-          {
-            "expr": "quantum_planner_problem_size_tasks",
-            "legendFormat": "Tasks"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "short"
-          }
-        },
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
-      },
-      {
-        "id": 7,
-        "title": "Error Rate by Backend",
-        "type": "timeseries",
-        "targets": [
-          {
-            "expr": "rate(quantum_planner_errors_total[5m])",
-            "legendFormat": "{{backend}} - {{error_type}}"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "reqps",
-            "color": {"mode": "palette-classic"}
-          }
-        },
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+        ]
       }
-    ],
-    "time": {
-      "from": "now-1h",
-      "to": "now"
-    },
-    "refresh": "30s",
-    "schemaVersion": 27
+    ]
   }
 }

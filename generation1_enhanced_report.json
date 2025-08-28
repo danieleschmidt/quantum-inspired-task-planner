@@ -1,0 +1,122 @@
+{
+  "generation": 1,
+  "enhanced": true,
+  "test_results": [
+    [
+      "Basic Enhanced Assignment",
+      {
+        "assignments": {
+          "ml_pipeline": "agent1",
+          "deployment": "agent3",
+          "backend_api": "agent1",
+          "frontend_ui": "agent2"
+        },
+        "metrics": {
+          "makespan": 6,
+          "total_cost": 495.0,
+          "skill_utilization": 0.8333333333333334,
+          "load_balance": 0.19148936170212766,
+          "assignment_rate": 1.0
+        },
+        "solve_time": 0.00010371208190917969,
+        "backend_used": "simulated_annealing",
+        "success": true,
+        "generation": 1
+      }
+    ],
+    [
+      "Large Scale Enhanced Assignment",
+      {
+        "assignments": {
+          "task_8": "agent_2",
+          "task_17": "agent_1",
+          "task_7": "agent_1",
+          "task_16": "agent_0",
+          "task_6": "agent_0",
+          "task_15": "agent_0",
+          "task_24": "agent_3",
+          "task_5": "agent_0",
+          "task_14": "agent_3",
+          "task_23": "agent_2",
+          "task_4": "agent_3",
+          "task_13": "agent_2",
+          "task_22": "agent_1",
+          "task_3": "agent_2",
+          "task_12": "agent_1",
+          "task_21": "agent_0",
+          "task_2": "agent_1",
+          "task_11": "agent_0",
+          "task_20": "agent_0",
+          "task_1": "agent_0",
+          "task_10": "agent_0",
+          "task_19": "agent_3",
+          "task_0": "agent_0",
+          "task_9": "agent_3",
+          "task_18": "agent_2"
+        },
+        "metrics": {
+          "makespan": 29,
+          "total_cost": 3136.0,
+          "skill_utilization": 0.25,
+          "load_balance": 0.026143790849673203,
+          "assignment_rate": 1.0
+        },
+        "solve_time": 0.0007498264312744141,
+        "backend_used": "simulated_annealing",
+        "success": true,
+        "generation": 1
+      }
+    ],
+    [
+      "Enhanced Capacity Constraints",
+      {
+        "assignments": {
+          "python_task_0": "small1",
+          "python_task_1": "small1",
+          "python_task_2": "small1",
+          "python_task_3": "small1",
+          "python_task_4": "small1",
+          "python_task_5": "small1"
+        },
+        "metrics": {
+          "makespan": 6,
+          "total_cost": 180.0,
+          "skill_utilization": 0.25,
+          "load_balance": 1.0,
+          "assignment_rate": 1.0
+        },
+        "solve_time": 6.985664367675781e-05,
+        "backend_used": "simulated_annealing",
+        "success": true,
+        "generation": 1
+      }
+    ],
+    [
+      "Enhanced Cost Optimization",
+      {
+        "assignments": {
+          "ml_task": "moderate",
+          "simple_python": "budget"
+        },
+        "metrics": {
+          "makespan": 3,
+          "total_cost": 240.0,
+          "skill_utilization": 0.4,
+          "load_balance": 0.8,
+          "assignment_rate": 1.0
+        },
+        "solve_time": 3.1948089599609375e-05,
+        "backend_used": "simulated_annealing",
+        "success": true,
+        "generation": 1
+      }
+    ]
+  ],
+  "performance_summary": {
+    "total_solve_time": 0.0009553432464599609,
+    "average_assignment_rate": 1.0,
+    "tests_passed": 4,
+    "success": true
+  },
+  "timestamp": 1756348068.319317
+}

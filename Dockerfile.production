@@ -1,0 +1,25 @@
+FROM python:3.11-slim as builder
+WORKDIR /app
+COPY pyproject.toml poetry.lock ./
+RUN pip install poetry && \
+    poetry config virtualenvs.create false && \
+    poetry install --only=main --no-dev
+
+FROM python:3.11-slim as runtime
+WORKDIR /app
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+COPY src/ ./src/
+COPY README.md ./
+
+# Security: Non-root user
+RUN adduser --disabled-password --gecos "" appuser && \
+    chown -R appuser:appuser /app
+USER appuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD python -c "import src.quantum_planner; print('healthy')" || exit 1
+
+EXPOSE 8000
+CMD ["python", "-m", "src.quantum_planner.cli"]
