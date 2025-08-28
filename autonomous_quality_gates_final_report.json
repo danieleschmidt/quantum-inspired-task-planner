@@ -1,0 +1,479 @@
+{
+  "session_id": "a8ac49d1a3f5ef11",
+  "timestamp": 1756349098.004461,
+  "overall_score": 91.61726764879751,
+  "passed": false,
+  "summary": {
+    "total_checks": 15,
+    "passed_checks": 13,
+    "failed_checks": 2,
+    "execution_time": 0.8025829792022705,
+    "critical_failures": 1,
+    "quality_threshold_met": false,
+    "deployment_ready": false
+  },
+  "categories": {
+    "code_quality": 88.8888888888889,
+    "testing": 100.0,
+    "deployment": 88.27777777777777,
+    "documentation": 90.14640918843872,
+    "performance": 100.0,
+    "security": 81.23309817754262
+  },
+  "quality_thresholds": {
+    "overall": 85.0,
+    "testing": 85.0,
+    "security": 90.0,
+    "performance": 80.0,
+    "code_quality": 85.0,
+    "documentation": 75.0,
+    "deployment": 85.0
+  },
+  "recommendations": [
+    "Improve security quality (current: 81.2%, target: 90.0%)",
+    "Address 1 critical failures in security/testing"
+  ],
+  "detailed_checks": [
+    {
+      "name": "Code Structure Validation",
+      "category": "code_quality",
+      "passed": true,
+      "score": 100.0,
+      "execution_time": 0.0015795230865478516,
+      "details": {
+        "directory_structure": {
+          "required": [
+            "src",
+            "tests",
+            "docs"
+          ],
+          "existing": [
+            "src",
+            "tests",
+            "docs"
+          ],
+          "score": 100.0
+        },
+        "key_files": {
+          "required": [
+            "README.md",
+            "pyproject.toml",
+            "Makefile"
+          ],
+          "existing": [
+            "README.md",
+            "pyproject.toml",
+            "Makefile"
+          ],
+          "score": 100.0
+        },
+        "package_structure": {
+          "required": [
+            "__init__.py",
+            "models.py",
+            "planner.py",
+            "optimizer.py"
+          ],
+          "existing": [
+            "__init__.py",
+            "models.py",
+            "planner.py",
+            "optimizer.py"
+          ],
+          "score": 100.0
+        }
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "name": "Integration Testing",
+      "category": "testing",
+      "passed": true,
+      "score": 100,
+      "execution_time": 0.026127338409423828,
+      "details": {
+        "integration_test_files": 2,
+        "root_integration_tests": 2,
+        "e2e_test_files": 10,
+        "comprehensive_tests": 9
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "name": "Production Readiness",
+      "category": "deployment",
+      "passed": true,
+      "score": 81.5,
+      "execution_time": 0.010503768920898438,
+      "details": {
+        "configuration_files": {
+          "required": [
+            "pyproject.toml",
+            "setup.py",
+            "requirements.txt",
+            "Dockerfile",
+            "docker-compose.yml"
+          ],
+          "found": [
+            "pyproject.toml",
+            "Dockerfile",
+            "docker-compose.yml"
+          ],
+          "score": 60.0
+        },
+        "ci_cd_files": {
+          "options": [
+            ".github/workflows",
+            ".gitlab-ci.yml",
+            "Jenkinsfile",
+            "workflows-ready-to-deploy",
+            "workflows-to-add"
+          ],
+          "found": [
+            "workflows-ready-to-deploy",
+            "workflows-to-add"
+          ],
+          "score": 100
+        },
+        "environment_management": {
+          "options": [
+            ".env.example",
+            "environment.yml",
+            "dev-requirements.txt"
+          ],
+          "found": [
+            ".env.example",
+            "dev-requirements.txt"
+          ],
+          "score": 66
+        },
+        "production_implementations": {
+          "production_files": 5,
+          "score": 100
+        }
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "name": "Dependency Health",
+      "category": "deployment",
+      "passed": true,
+      "score": 83.33333333333333,
+      "execution_time": 0.0030736923217773438,
+      "details": {
+        "pyproject_analysis": {
+          "sections_found": 3,
+          "sections_total": 3,
+          "score": 100.0
+        },
+        "lock_files": {
+          "options": [
+            "poetry.lock",
+            "requirements.txt",
+            "Pipfile.lock"
+          ],
+          "found": [
+            "poetry.lock"
+          ],
+          "score": 50
+        },
+        "dependency_scripts": {
+          "options": [
+            "requirements.md",
+            "dev-requirements.txt"
+          ],
+          "found": [
+            "requirements.md",
+            "dev-requirements.txt"
+          ],
+          "score": 100
+        }
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "name": "Unit Test Coverage",
+      "category": "testing",
+      "passed": true,
+      "score": 100.0,
+      "execution_time": 0.0606236457824707,
+      "details": {
+        "test_files_found": 32,
+        "test_file_paths": [
+          "/root/repo/tests/test_enhanced_research_modules.py",
+          "/root/repo/tests/benchmarks/test_performance.py",
+          "/root/repo/tests/e2e/test_workflows.py",
+          "/root/repo/tests/integration/test_end_to_end.py",
+          "/root/repo/tests/integration/test_neural_cryptanalysis_integration.py",
+          "/root/repo/tests/performance/test_cryptanalysis_benchmarks.py",
+          "/root/repo/tests/property/test_properties.py",
+          "/root/repo/tests/unit/test_models.py",
+          "/root/repo/tests/unit/test_neural_operator_cryptanalysis.py",
+          "/root/repo/test_autonomous_implementation_validation.py"
+        ],
+        "source_files_found": 76,
+        "test_pattern_coverage": 100,
+        "estimated_coverage": 100
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "name": "API Completeness",
+      "category": "documentation",
+      "passed": true,
+      "score": 100.0,
+      "execution_time": 0.27596449851989746,
+      "details": {
+        "__init___analysis": {
+          "has___all__": true,
+          "key_imports_found": 4,
+          "key_imports_total": 4,
+          "score": 100.0
+        },
+        "api_consistency": {
+          "method_patterns_found": 44,
+          "score": 100
+        }
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "name": "Documentation Quality",
+      "category": "documentation",
+      "passed": true,
+      "score": 80.29281837687745,
+      "execution_time": 0.30111050605773926,
+      "details": {
+        "readme_sections": {
+          "found": 3,
+          "total": 5,
+          "score": 60.0
+        },
+        "docstring_coverage": {
+          "total_functions": 2641,
+          "documented_functions": 2136,
+          "score": 80.87845513063233
+        },
+        "additional_docs": {
+          "doc_files": 25,
+          "score": 100
+        }
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "name": "Code Maintainability",
+      "category": "code_quality",
+      "passed": false,
+      "score": 66.66666666666667,
+      "execution_time": 0.31792211532592773,
+      "details": {
+        "code_organization": {
+          "total_modules": 76,
+          "total_classes": 529,
+          "total_functions": 2171,
+          "avg_classes_per_module": 6.9605263157894735,
+          "avg_functions_per_module": 28.56578947368421,
+          "score": 75.0
+        },
+        "quality_tools": {
+          "available_tools": [
+            "pyproject.toml",
+            ".pre-commit-config.yaml",
+            "tox.ini",
+            "setup.cfg"
+          ],
+          "configured_tools": [
+            "pyproject.toml",
+            ".pre-commit-config.yaml"
+          ],
+          "score": 50.0
+        },
+        "separation_of_concerns": {
+          "concern_areas": [
+            "models",
+            "planner",
+            "optimizer",
+            "backends"
+          ],
+          "score": 75
+        }
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "name": "Error Handling",
+      "category": "code_quality",
+      "passed": true,
+      "score": 100.0,
+      "execution_time": 0.3820796012878418,
+      "details": {
+        "error_handling_patterns": {
+          "try_except": 413,
+          "logging_errors": 139,
+          "custom_exceptions": 439,
+          "error_recovery": 259
+        },
+        "pattern_scores": {
+          "try_except": 100,
+          "logging": 100,
+          "custom_exceptions": 100,
+          "recovery": 100
+        }
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "name": "Import System Testing",
+      "category": "testing",
+      "passed": true,
+      "score": 100.0,
+      "execution_time": 0.6951243877410889,
+      "details": {
+        "import_tests": {
+          "quantum_planner.models.Agent": "SUCCESS",
+          "quantum_planner.models.Task": "SUCCESS",
+          "quantum_planner.models.Solution": "SUCCESS",
+          "quantum_planner.planner.QuantumTaskPlanner": "SUCCESS",
+          "quantum_planner.optimizer.OptimizationBackend": "SUCCESS"
+        },
+        "success_rate": 1.0,
+        "functionality_test": "SUCCESS"
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "name": "Performance Benchmarks",
+      "category": "performance",
+      "passed": true,
+      "score": 100.0,
+      "execution_time": 0.7019011974334717,
+      "details": {
+        "object_creation_1000": "0.0040s",
+        "agent_memory_size": 48,
+        "task_memory_size": 48,
+        "performance_files": 4,
+        "performance_score_breakdown": {
+          "creation_speed": 100,
+          "memory_efficiency": 100,
+          "optimization_features": 100
+        }
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "name": "Security Validation",
+      "category": "security",
+      "passed": false,
+      "score": 64.60905349794238,
+      "execution_time": 0.7764854431152344,
+      "details": {
+        "hardcoded_secrets_check": {
+          "suspicious_files": 34,
+          "score": 0
+        },
+        "input_validation_check": {
+          "validation_files": 67,
+          "score": 100
+        },
+        "error_handling_check": {
+          "total_files": 81,
+          "files_with_error_handling": 76,
+          "score": 93.82716049382715
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Found 34 files with potential hardcoded secrets"
+      ]
+    },
+    {
+      "name": "Scalability Assessment",
+      "category": "performance",
+      "passed": true,
+      "score": 100.0,
+      "execution_time": 0.5147161483764648,
+      "details": {
+        "scalability_patterns": {
+          "async_await": 169,
+          "threading": 240,
+          "multiprocessing": 60,
+          "caching": 1957,
+          "optimization": 2941
+        },
+        "pattern_scores": {
+          "async_await": 100,
+          "threading": 100,
+          "multiprocessing": 100,
+          "caching": 100,
+          "optimization": 100
+        },
+        "scalable_architectures": {
+          "architecture_files": 5,
+          "score": 100
+        }
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "name": "Monitoring Integration",
+      "category": "deployment",
+      "passed": true,
+      "score": 100.0,
+      "execution_time": 0.4949979782104492,
+      "details": {
+        "monitoring_patterns": {
+          "logging": 2068,
+          "metrics": 2494,
+          "health_checks": 1610,
+          "alerting": 255,
+          "tracing": 723
+        },
+        "pattern_scores": {
+          "logging": 100,
+          "metrics": 100,
+          "health_checks": 100,
+          "alerting": 100,
+          "tracing": 100
+        },
+        "monitoring_configs": {
+          "config_files": [
+            "monitoring",
+            "observability"
+          ],
+          "score": 100
+        }
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "name": "Memory Safety",
+      "category": "security",
+      "passed": true,
+      "score": 97.85714285714286,
+      "execution_time": 0.7987594604492188,
+      "details": {
+        "safe_practices": 402,
+        "unsafe_practices": 18,
+        "memory_safety_score": 95.71428571428572,
+        "cleanup_practices": 122,
+        "cleanup_score": 100
+      },
+      "errors": [],
+      "warnings": []
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+# API Gateway Configuration for Quantum Planner
+# Using Kong Gateway
+
+apiVersion: configuration.konghq.com/v1
+kind: KongIngress
+metadata:
+  name: quantum-planner-gateway
+proxy:
+  connect_timeout: 30000
+  read_timeout: 30000
+  write_timeout: 30000
+route:
+  strip_path: true
+upstream:
+  healthchecks:
+    active:
+      healthy:
+        interval: 30
+        successes: 3
+      unhealthy:
+        interval: 30
+        http_failures: 3
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: quantum-planner-api-gateway
+  annotations:
+    kubernetes.io/ingress.class: kong
+    konghq.com/plugins: rate-limiting, cors, jwt-auth
+    konghq.com/strip-path: "true"
+spec:
+  rules:
+  - host: api.quantum-planner.com
+    http:
+      paths:
+      - path: /api/v1
+        pathType: Prefix
+        backend:
+          service:
+            name: quantum-planner-service
+            port:
+              number: 80
+---
+# Rate limiting plugin
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: rate-limiting
+config:
+  minute: 100
+  hour: 1000
+  policy: local
+plugin: rate-limiting
+---
+# CORS plugin
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: cors
+config:
+  origins:
+  - "https://quantum-planner.com"
+  - "https://app.quantum-planner.com"
+  methods:
+  - GET
+  - POST
+  - PUT
+  - DELETE
+  headers:
+  - Accept
+  - Authorization
+  - Content-Type
+  credentials: true
+plugin: cors

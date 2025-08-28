@@ -1,0 +1,56 @@
+groups:
+  - name: quantum_planner
+    rules:
+      - alert: HighRequestRate
+        expr: rate(http_requests_total[5m]) > 100
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: High request rate detected
+          description: Request rate is {{ $value }} requests per second
+      
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: High error rate detected
+          description: Error rate is {{ $value | humanizePercentage }}
+      
+      - alert: DatabaseDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Database is down
+          description: PostgreSQL database is not responding
+      
+      - alert: CacheDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Cache is down
+          description: Redis cache is not responding
+      
+      - alert: HighMemoryUsage
+        expr: (memory_usage_percent > 90)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High memory usage
+          description: Memory usage is {{ $value }}%
+      
+      - alert: TaskAssignmentFailures
+        expr: rate(task_assignments_failed_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: Task assignment failures detected
+          description: Task assignment failure rate is {{ $value }} per second
