@@ -150,7 +150,7 @@ ENTRYPOINT ["./entrypoint.sh"]
 CMD ["quantum-planner", "--help"]
 
 # ===== Minimal Production Stage =====
-FROM python:3.13-alpine as minimal
+FROM python:3.14-alpine as minimal
 
 # Install minimal dependencies
 RUN apk add --no-cache \
